@@ -111,7 +111,7 @@ int main(int args){
                         {3,4}};
 
     SearchPattern(4,4,2,2, frame0, window);
-
+//SearchPattern(int framex, int framey, int windowx, int windowy, int** frame, int** window)
     return 0;
 
 }
