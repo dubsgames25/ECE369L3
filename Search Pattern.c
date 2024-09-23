@@ -3,7 +3,7 @@
 #include <string.h>
 #include <limits.h>
 
-int SAD(int *temp, int *window,int size){
+int SAD(int **temp, int **window,int size){
     // Compares our temp window from the frame to the desired window.
     // Takes in an array pointer for the window from the frame array and desired window array
     // as well as the window size in the format of length * width.
@@ -20,7 +20,16 @@ int SAD(int *temp, int *window,int size){
 }
 
 //TODO Implement read function to read in a window. Should return an array of the window
-int[] ReadArr(int row, int col, int[] temp){
+int* ReadArr(int row, int col, int windowx, int windowy){
+    int* temp_window = (int*)malloc(window_size * window_size * sizeof(int));
+    int window_index = 0;
+    for(int i = 0; i < windowx; i++){
+        for(int j = 0; j < windowy; j++){
+            temp_window[window_index] = frame[i][j];
+            ++window_index;
+        }
+    }
+    return temp_window;
 
 }
 
@@ -45,31 +54,44 @@ void SearchPattern(int framex, int framey, int windowx, int windowy) {
         if (direction == 0) { // Move right
             i = top;
             for (j = left; j <= right; j++) {
-                temp = [0][0];
+                
                 tempSAD = SAD();
                 if(tempSAD<lowestSAD){
                     lowestSAD=tempSAD;
                 }
             }
             top++;
+            direction = 1;
         } else if (direction == 1) { // Move down
             j=right;
             for (i = top; i <= bottom; i++) {
                 // Process cell (i, right)
+                tempSAD = SAD();
+                if(tempSAD<lowestSAD){
+                    lowestSAD=tempSAD;
+                }
             }
             right--;
+            direction = 2;
         } else if (direction == 2) { // Move left
             for (i = right; i >= left; i--) {
                 // Process cell (bottom, i)
+                tempSAD = SAD();
+                if(tempSAD<lowestSAD){
+                    lowestSAD=tempSAD;
+                }
             }
             bottom--;
         } else if (direction == 3) { // Move up
             for (i = bottom; i >= top; i--) {
-// Process cell (i, left)
+                // Process cell (i, left)
+                tempSAD = SAD();
+                if(tempSAD<lowestSAD){
+                    lowestSAD=tempSAD;
+                }
             }
             left++;
+            direction = 3;
         }
-
-        direction = (direction + 1) % 4;
     }
 }
