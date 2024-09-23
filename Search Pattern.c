@@ -13,15 +13,16 @@ int SAD(int **temp, int **window,int size){
     int sum = 0;
     int windowSum = 0;
     for (int i = 0; i < size; i++) {
-            sum += temp[i];
-            windowSum += window[i];
+        for(int j = 0; j < size; j++) {
+            sum += temp[i][j];
+            windowSum += window[i][j];
+        }
     }
     return sum-windowSum;
 }
 
-//TODO Implement read function to read in a window. Should return an array of the window
-int* ReadArr(int row, int col, int windowx, int windowy){
-    int* temp_window = (int*)malloc(window_size * window_size * sizeof(int));
+int* ReadArr(int row, int col, int windowx, int windowy, int **frame){
+    int* temp_window = (int*)malloc(windowx * windowy * sizeof(int));
     int window_index = 0;
     for(int i = 0; i < windowx; i++){
         for(int j = 0; j < windowy; j++){
@@ -30,20 +31,20 @@ int* ReadArr(int row, int col, int windowx, int windowy){
         }
     }
     return temp_window;
-
 }
 
 
 
-void SearchPattern(int framex, int framey, int windowx, int windowy) {
-    int frame[framex][framey];
-    int temp[windowx][windowy];
-    int window[windowx][windowy];
+void SearchPattern(int framex, int framey, int windowx, int windowy, int** frame, int** window) {
+    int temp[windowx*windowy];
+    int** tempWindow;
     int rows = framex; // Number of rows in the grid
     int cols = framey; // Number of columns in the grid
-    int top = 0, bottom = rows - windowx, left = 0, right = cols - windowy;
+    int top = 0, bottom = rows, left = 0, right = cols;
     int direction = 0;
-    int lowestSAD = SAD(*temp, *window, windowx*windowy);
+    int lowestSAD = SAD(temp, window, windowx);
+    int lowestSADIndexI;
+    int lowestSADIndexJ;
     int tempSAD = 0;
     int i,j;
 
@@ -54,10 +55,12 @@ void SearchPattern(int framex, int framey, int windowx, int windowy) {
         if (direction == 0) { // Move right
             i = top;
             for (j = left; j <= right; j++) {
-                
-                tempSAD = SAD();
+                tempWindow = ReadArr(i, j, windowx, windowy, (int **) frame);
+                tempSAD = SAD(tempWindow, window, windowy);
                 if(tempSAD<lowestSAD){
                     lowestSAD=tempSAD;
+                    lowestSADIndexI = i;
+                    lowestSADIndexJ = j;
                 }
             }
             top++;
@@ -65,8 +68,8 @@ void SearchPattern(int framex, int framey, int windowx, int windowy) {
         } else if (direction == 1) { // Move down
             j=right;
             for (i = top; i <= bottom; i++) {
-                // Process cell (i, right)
-                tempSAD = SAD();
+                tempWindow = ReadArr(i, j, windowx, windowy, (int **) frame);
+                tempSAD = SAD(tempWindow, window, windowy);
                 if(tempSAD<lowestSAD){
                     lowestSAD=tempSAD;
                 }
@@ -75,23 +78,40 @@ void SearchPattern(int framex, int framey, int windowx, int windowy) {
             direction = 2;
         } else if (direction == 2) { // Move left
             for (i = right; i >= left; i--) {
-                // Process cell (bottom, i)
-                tempSAD = SAD();
+                tempWindow = ReadArr(i, j, windowx, windowy, (int **) frame);
+                tempSAD = SAD(tempWindow, window, windowy);
                 if(tempSAD<lowestSAD){
                     lowestSAD=tempSAD;
                 }
             }
             bottom--;
+            direction = 3;
         } else if (direction == 3) { // Move up
             for (i = bottom; i >= top; i--) {
                 // Process cell (i, left)
-                tempSAD = SAD();
+                tempSAD = SAD(tempWindow, window, windowy);
                 if(tempSAD<lowestSAD){
                     lowestSAD=tempSAD;
                 }
             }
             left++;
-            direction = 3;
+            direction = 0;
         }
     }
+    printf("%d, %d", lowestSADIndexJ, lowestSADIndexI);
+}
+
+int main(int args){
+    int asize0[4] = {4,4,2,2};
+    int frame0[4][4] = {{0,0,1,2},
+                        {0,0,3,4},
+                        {0,0,0,0},
+                        {0,0,0,0}};
+    int window[2][2] = {{1,2},
+                        {3,4}};
+
+    SearchPattern(4,4,2,2, frame0, window);
+
+    return 0;
+
 }
