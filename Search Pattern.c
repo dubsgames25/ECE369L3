@@ -22,7 +22,6 @@ int SAD(int temp[2][2], int window[2][2],int size){
 }
 
 void ReadArr(int row, int col, int windowx, int windowy, int frame[4][4], int temp[2][2]){
-    int window_index = 0;
     for(int i = row; i < row+windowx-1; i++){
         for(int j = col; j < col+windowy-1; j++){
             temp[i][j] = frame[i][j];
@@ -32,7 +31,7 @@ void ReadArr(int row, int col, int windowx, int windowy, int frame[4][4], int te
 
 
 
-void SearchPattern(int framex, int framey, int windowx, int windowy, int** frame, int** window) {
+void SearchPattern(int framex, int framey, int windowx, int windowy, int frame[4][4], int window[2][2]) {
     int temp[windowx][windowy];
     int rows = framex; // Number of rows in the grid
     int cols = framey; // Number of columns in the grid
