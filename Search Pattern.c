@@ -35,7 +35,7 @@ int* ReadArr(int row, int col, int windowx, int windowy, int **frame){
 
 
 
-void SearchPattern(int framex, int framey, int windowx, int windowy, int** frame, int** window) {
+void SearchPattern(int framex, int framey, int windowx, int windowy, int frame[4][4], int window[2][2]) {
     int temp[windowx*windowy];
     int** tempWindow;
     int rows = framex; // Number of rows in the grid
@@ -48,7 +48,7 @@ void SearchPattern(int framex, int framey, int windowx, int windowy, int** frame
     int tempSAD = 0;
     int i,j;
 
-
+}
 
 
     while (top <= bottom && left <= right) {
