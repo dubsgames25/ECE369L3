@@ -3,7 +3,7 @@
 #include <string.h>
 #include <limits.h>
 
-int SAD(int **temp, int **window,int size){
+int SAD(int temp[2][2], int window[2][2],int size){
     // Compares our temp window from the frame to the desired window.
     // Takes in an array pointer for the window from the frame array and desired window array
     // as well as the window size in the format of length * width.
@@ -21,13 +21,11 @@ int SAD(int **temp, int **window,int size){
     return sum-windowSum;
 }
 
-int* ReadArr(int row, int col, int windowx, int windowy, int **frame){
-    int* temp_window = (int*)malloc(windowx * windowy * sizeof(int));
+void ReadArr(int row, int col, int windowx, int windowy, int frame[4][4], temp[2][2]){
     int window_index = 0;
-    for(int i = 0; i < windowx; i++){
-        for(int j = 0; j < windowy; j++){
-            temp_window[window_index] = frame[i][j];
-            ++window_index;
+    for(int i = row; i < row+windowx-1; i++){
+        for(int j = column; j < col+windowy-1; j++){
+            temp_window[i][j] = frame[i][j];
         }
     }
     return temp_window;
@@ -36,13 +34,12 @@ int* ReadArr(int row, int col, int windowx, int windowy, int **frame){
 
 
 void SearchPattern(int framex, int framey, int windowx, int windowy, int frame[4][4], int window[2][2]) {
-    int temp[windowx*windowy];
-    int** tempWindow;
+    int temp[windowx][windowy];
     int rows = framex; // Number of rows in the grid
     int cols = framey; // Number of columns in the grid
     int top = 0, bottom = rows, left = 0, right = cols;
     int direction = 0;
-    int lowestSAD = SAD(temp, window, windowx);
+    int lowestSAD = 1000;
     int lowestSADIndexI;
     int lowestSADIndexJ;
     int tempSAD = 0;
@@ -68,7 +65,7 @@ void SearchPattern(int framex, int framey, int windowx, int windowy, int frame[4
         } else if (direction == 1) { // Move down
             j=right;
             for (i = top; i <= bottom; i++) {
-                tempWindow = ReadArr(i, j, windowx, windowy, (int **) frame);
+                tempWindow = ReadArr(i, j, windowx, windowy, frame, );
                 tempSAD = SAD(tempWindow, window, windowy);
                 if(tempSAD<lowestSAD){
                     lowestSAD=tempSAD;
