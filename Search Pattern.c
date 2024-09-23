@@ -21,19 +21,18 @@ int SAD(int temp[2][2], int window[2][2],int size){
     return sum-windowSum;
 }
 
-void ReadArr(int row, int col, int windowx, int windowy, int frame[4][4], temp[2][2]){
+void ReadArr(int row, int col, int windowx, int windowy, int frame[4][4], int temp[2][2]){
     int window_index = 0;
     for(int i = row; i < row+windowx-1; i++){
-        for(int j = column; j < col+windowy-1; j++){
-            temp_window[i][j] = frame[i][j];
+        for(int j = col; j < col+windowy-1; j++){
+            temp[i][j] = frame[i][j];
         }
     }
-    return temp_window;
 }
 
 
 
-void SearchPattern(int framex, int framey, int windowx, int windowy, int frame[4][4], int window[2][2]) {
+void SearchPattern(int framex, int framey, int windowx, int windowy, int** frame, int** window) {
     int temp[windowx][windowy];
     int rows = framex; // Number of rows in the grid
     int cols = framey; // Number of columns in the grid
@@ -45,15 +44,15 @@ void SearchPattern(int framex, int framey, int windowx, int windowy, int frame[4
     int tempSAD = 0;
     int i,j;
 
-}
+
 
 
     while (top <= bottom && left <= right) {
         if (direction == 0) { // Move right
             i = top;
             for (j = left; j <= right; j++) {
-                tempWindow = ReadArr(i, j, windowx, windowy, (int **) frame);
-                tempSAD = SAD(tempWindow, window, windowy);
+                ReadArr(i, j, windowx, windowy, frame, temp);
+                tempSAD = SAD(temp, window, windowy);
                 if(tempSAD<lowestSAD){
                     lowestSAD=tempSAD;
                     lowestSADIndexI = i;
@@ -65,8 +64,8 @@ void SearchPattern(int framex, int framey, int windowx, int windowy, int frame[4
         } else if (direction == 1) { // Move down
             j=right;
             for (i = top; i <= bottom; i++) {
-                tempWindow = ReadArr(i, j, windowx, windowy, frame, );
-                tempSAD = SAD(tempWindow, window, windowy);
+                ReadArr(i, j, windowx, windowy, frame, temp);
+                tempSAD = SAD(temp, window, windowy);
                 if(tempSAD<lowestSAD){
                     lowestSAD=tempSAD;
                 }
@@ -75,8 +74,8 @@ void SearchPattern(int framex, int framey, int windowx, int windowy, int frame[4
             direction = 2;
         } else if (direction == 2) { // Move left
             for (i = right; i >= left; i--) {
-                tempWindow = ReadArr(i, j, windowx, windowy, (int **) frame);
-                tempSAD = SAD(tempWindow, window, windowy);
+                ReadArr(i, j, windowx, windowy, frame, temp);
+                tempSAD = SAD(temp, window, windowy);
                 if(tempSAD<lowestSAD){
                     lowestSAD=tempSAD;
                 }
@@ -85,8 +84,8 @@ void SearchPattern(int framex, int framey, int windowx, int windowy, int frame[4
             direction = 3;
         } else if (direction == 3) { // Move up
             for (i = bottom; i >= top; i--) {
-                // Process cell (i, left)
-                tempSAD = SAD(tempWindow, window, windowy);
+                ReadArr(i, j, windowx, windowy, frame, temp);
+                tempSAD = SAD(temp, window, windowy);
                 if(tempSAD<lowestSAD){
                     lowestSAD=tempSAD;
                 }
@@ -108,7 +107,7 @@ int main(int args){
                         {3,4}};
 
     SearchPattern(4,4,2,2, frame0, window);
-//SearchPattern(int framex, int framey, int windowx, int windowy, int** frame, int** window)
+
     return 0;
 
 }
