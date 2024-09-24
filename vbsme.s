@@ -780,4 +780,257 @@ vbsme:
     li      $v1, 0
 
     # insert your code here
-   
+# SearchPattern ################################################################################################################    
+.text
+.globl SearchPattern
+SearchPattern:
+    # Allocate stack space and save registers
+    addi $sp, $sp, -48           # Allocate space for saving registers
+    sw   $ra, 44($sp)            # Save return address
+    sw   $s0, 40($sp)            # Save s0 (frame pointer)
+    sw   $s1, 36($sp)            # Save s1 (window pointer)
+    sw   $s2, 32($sp)            # Save s2 (temp pointer)
+    sw   $s3, 28($sp)            # Save s3 (rows)
+    sw   $s4, 24($sp)            # Save s4 (cols)
+    sw   $s5, 20($sp)            # Save s5 (top)
+    sw   $s6, 16($sp)            # Save s6 (bottom)
+    sw   $s7, 12($sp)            # Save s7 (left)
+    sw   $t0, 8($sp)             # Save t0 (right)
+    sw   $t1, 4($sp)             # Save t1 (direction)
+
+    # Input parameters: framex = $a0, framey = $a1, windowx = $a2, windowy = $a3
+    # frame pointer in $s0, window pointer in $s1
+
+    # Allocate memory for temp array (similar to malloc)
+    mul  $t2, $a2, $a3           # t2 = windowx * windowy
+    li   $t3, 4                  # sizeof(int) = 4
+    mul  $t2, $t2, $t3           # t2 = windowx * windowy * sizeof(int)
+    li   $v0, 9                  # syscall 9 (sbrk/malloc equivalent)
+    move $a0, $t2                # argument to syscall: size of array
+    syscall                      # syscall to allocate memory
+    move $s2, $v0                # store the pointer to temp in $s2
+
+    # Initialize variables
+    move $s3, $a0                # rows = framex
+    move $s4, $a1                # cols = framey
+    li   $s5, 0                  # top = 0
+    add  $s6, $s3, -1            # bottom = framex - 1
+    li   $s7, 0                  # left = 0
+    add  $t0, $s4, -1            # right = framey - 1
+    li   $t1, 0                  # direction = 0
+
+    # Initialize lowestSAD to INT_MAX (0x7FFFFFFF)
+    li   $t2, 0x7FFFFFFF         # lowestSAD = INT_MAX
+    li   $t3, 0                  # lowestSADIndexI = 0
+    li   $t4, 0                  # lowestSADIndexJ = 0
+
+    # Main loop: while (top <= bottom && left <= right)
+WhileLoop:
+    ble  $s5, $s6, CheckLeftRight
+    b    EndLoop                 # Exit if top > bottom
+
+CheckLeftRight:
+    ble  $s7, $t0, LoopBody
+    b    EndLoop                 # Exit if left > right
+
+LoopBody:
+    # Check direction (0: Move right, 1: Move down, 2: Move left, 3: Move up)
+    beq  $t1, 0, MoveRight       # Move right
+    beq  $t1, 1, MoveDown        # Move down
+    beq  $t1, 2, MoveLeft        # Move left
+    beq  $t1, 3, MoveUp          # Move up
+
+MoveRight:
+    move $t6, $s5                # i = top
+    move $t7, $s7                # j = left
+MoveRightLoop:
+    ble  $t7, $t0, ProcessRight
+    b    DoneMoveRight
+
+ProcessRight:
+    # Call ReadArr(i, j, windowx, windowy, frame, temp, cols)
+    move $a0, $t6                # i
+    move $a1, $t7                # j
+    move $a2, $a2                # windowx
+    move $a3, $a3                # windowy
+    move $t0, $s0                # frame
+    move $t1, $s2                # temp
+    move $t2, $s4                # cols (frame width)
+    jal  ReadArr                 # Call ReadArr
+
+    # Call SAD(temp, window, windowx * windowy)
+    move $a0, $s2                # temp
+    move $a1, $s1                # window
+    mul  $a2, $a2, $a3           # windowx * windowy
+    jal  SAD                     # Call SAD
+    move $t5, $v0                # tempSAD = SAD result
+
+    # if (tempSAD < lowestSAD)
+    blt  $t5, $t2, UpdateLowestSAD
+    b    SkipUpdate
+
+UpdateLowestSAD:
+    move $t2, $t5                # lowestSAD = tempSAD
+    move $t3, $t6                # lowestSADIndexI = i
+    move $t4, $t7                # lowestSADIndexJ = j
+
+SkipUpdate:
+    addi $t7, $t7, 1             # j++
+    b    MoveRightLoop           # Continue loop
+
+DoneMoveRight:
+    addi $s5, $s5, 1             # top++
+    li   $t1, 1                  # direction = 1
+    b    WhileLoop               # Go back to main loop
+
+MoveDown:
+    # Similar logic for moving down
+
+MoveLeft:
+    # Similar logic for moving left
+
+MoveUp:
+    # Similar logic for moving up
+
+EndLoop:
+    # Output the result (print lowestSADIndexI and lowestSADIndexJ)
+    move $a0, $t3                # lowestSADIndexI
+    move $a1, $t4                # lowestSADIndexJ
+    jal  PrintResult             # Call print function (assuming this exists)
+
+    # Free temp array memory
+    move $a0, $s2                # temp pointer
+    li   $v0, 10                 # syscall for free (assumed to be syscall 10)
+    syscall
+
+    # Restore saved registers and return
+    lw   $ra, 44($sp)
+    lw   $s0, 40($sp)
+    lw   $s1, 36($sp)
+    lw   $s2, 32($sp)
+    lw   $s3, 28($sp)
+    lw   $s4, 24($sp)
+    lw   $s5, 20($sp)
+    lw   $s6, 16($sp)
+    lw   $s7, 12($sp)
+    lw   $t0, 8($sp)
+    lw   $t1, 4($sp)
+    addi $sp, $sp, 48            # Deallocate stack space
+    jr   $ra                     # Return
+# SAD (Sum of Absolute Differences) function ############################################################################################
+.text
+.globl SAD
+SAD:
+    # Allocate stack space and save registers
+    addi $sp, $sp, -32
+    sw $ra, 28($sp)
+    sw $t0, 24($sp)
+    sw $t1, 20($sp)
+    sw $t2, 16($sp)
+    sw $t3, 12($sp)
+    sw $t4, 8($sp)
+    sw $t5, 4($sp)
+    sw $t6, 0($sp)
+
+    # Load function arguments
+    move $t0, $a0  # temp array pointer
+    move $t1, $a1  # window array pointer
+    move $t2, $a2  # size
+
+    # Initialize sum and windowSum
+    move $t3, $zero  # sum
+    move $t4, $zero  # windowSum
+
+    # Loop through the arrays and calculate the sums
+loop:
+    beq $t2, $zero, end_loop
+    lw $t5, ($t0)
+    lw $t6, ($t1)
+    add $t3, $t3, $t5
+    add $t4, $t4, $t6
+    addi $t0, $t0, 4
+    addi $t1, $t1, 4
+    addi $t2, $t2, -1
+    j loop
+
+end_loop:
+    # Calculate the absolute difference
+    sub $t5, $t3, $t4
+    abs $v0, $t5
+
+    # Restore registers and return
+    lw $t6, 0($sp)
+    lw $t5, 4($sp)
+    lw $t4, 8($sp)
+    lw $t3, 12($sp)
+    lw $t2, 16($sp)
+    lw $t1, 20($sp)
+    lw $t0, 24($sp)
+    lw $ra, 28($sp)
+    addi $sp, $sp, 32
+    jr $ra
+
+# ReadArr function ################################################################################
+.text
+.globl ReadArr
+ReadArr:
+    # Allocate stack space and save registers
+    addi $sp, $sp, -36
+    sw $ra, 32($sp)
+    sw $t0, 28($sp)
+    sw $t1, 24($sp)
+    sw $t2, 20($sp)
+    sw $t3, 16($sp)
+    sw $t4, 12($sp)
+    sw $t5, 8($sp)
+    sw $t6, 4($sp)
+    sw $t7, 0($sp)
+
+    # Load function arguments
+    move $t0, $a0  # row
+    move $t1, $a1  # col
+    move $t2, $a2  # windowx
+    move $t3, $a3  # windowy
+    move $t4, $a0  # frame array pointer
+    move $t5, $a1  # temp array pointer
+    lw $t6, 40($sp)  # frameWidth
+
+    # Loop through the window and copy values to the temp array
+    move $t7, $zero  # i
+    move $t0, $zero  # j
+outer_loop:
+    beq $t7, $t2, end_outer_loop
+    move $t0, $zero
+inner_loop:
+    beq $t0, $t3, end_inner_loop
+    # Calculate the index in the frame array
+    mul $t1, $a0, $t6
+    add $t1, $t1, $a1
+    add $t1, $t1, $t0
+    # Calculate the index in the temp array
+    mul $t2, $t7, $t3
+    add $t2, $t2, $t0
+    # Copy the value from the frame array to the temp array
+    lw $t4, ($t1)
+    sw $t4, ($t2)
+    addi $t0, $t0, 1
+    j inner_loop
+end_inner_loop:
+    addi $a1, $a1, 1
+    addi $t7, $t7, 1
+    j outer_loop
+end_outer_loop:
+
+    # Restore registers and return
+    lw $t7, 0($sp)
+    lw $t6, 4($sp)
+    lw $t5, 8($sp)
+    lw $t4, 12($sp)
+    lw $t3, 16($sp)
+    lw $t2, 20($sp)
+    lw $t1, 24($sp)
+    lw $t0, 28($sp)
+    lw $ra, 32($sp)
+    addi $sp, $sp, 36
+    jr $ra
+
