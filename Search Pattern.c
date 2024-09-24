@@ -27,10 +27,12 @@ void ReadArr(int row, int col, int windowx, int windowy, int *frame, int *temp, 
 }
 
 
-void SearchPattern(int framex, int framey, int windowx, int windowy, int *frame, int *window) {
+void SearchPattern(int *sizes, int *frame, int *window) {
+    int rows = sizes[0];
+    int cols = sizes[1];
+    int windowx = sizes[2];
+    int windowy = sizes[3];
     int *temp = (int *)malloc(windowx * windowy * sizeof(int));
-    int rows = framex;
-    int cols = framey;
     int top = 0, bottom = rows - 1, left = 0, right = cols - 1;
     int direction = 0;
     int lowestSAD = INT_MAX;
@@ -370,14 +372,14 @@ int main(){
 
 
     //Test 14
-    SearchPattern(4, 4, 2, 2, (int *)frame0, (int *)window0);
-    SearchPattern(16, 16, 4, 4, (int *)frame1, (int *)window1);
-    SearchPattern(16,16,4,8,(int *)frame2, (int *)window2);
-    SearchPattern(16,16,8,4,(int *)frame3, (int *)window3);
-    SearchPattern(16,16,4,4,(int *)frame4, (int *)window4);
-    SearchPattern(32,32,8,16,(int *)frame5, (int *)window5);
-    SearchPattern(32,32,16,16,(int *)frame11, (int *)window11);
-    SearchPattern(16,16,4,4,(int *)frame12, (int *)window12);
+    SearchPattern(asize0, (int *)frame0, (int *)window0);
+    SearchPattern(asize1, (int *)frame1, (int *)window1);
+    SearchPattern(asize2,(int *)frame2, (int *)window2);
+    SearchPattern(asize3,(int *)frame3, (int *)window3);
+    SearchPattern(asize4,(int *)frame4, (int *)window4);
+    SearchPattern(asize5,(int *)frame5, (int *)window5);
+    SearchPattern(asize11,(int *)frame11, (int *)window11);
+    SearchPattern(asize12, (int *)frame12, (int *)window12);
 
 
     return 0;
