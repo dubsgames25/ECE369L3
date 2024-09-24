@@ -370,10 +370,16 @@ int main(){
 
 
     //Test 14
-
+    SearchPattern(4, 4, 2, 2, (int *)frame0, (int *)window0);
+    SearchPattern(16, 16, 4, 4, (int *)frame1, (int *)window1);
+    SearchPattern(16,16,4,8,(int *)frame2, (int *)window2);
+    SearchPattern(16,16,8,4,(int *)frame3, (int *)window3);
+    SearchPattern(16,16,4,4,(int *)frame4, (int *)window4);
+    SearchPattern(32,32,8,16,(int *)frame5, (int *)window5);
+    SearchPattern(32,32,16,16,(int *)frame11, (int *)window11);
     SearchPattern(16,16,4,4,(int *)frame12, (int *)window12);
-    //SearchPattern(4, 4, 2, 2, (int *)frame0, (int *)window0);
-    //SearchPattern(16, 16, 4, 4, (int *)frame1, (int *)window1);
+
+
     return 0;
 
 }
