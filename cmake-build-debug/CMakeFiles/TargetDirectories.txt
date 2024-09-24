@@ -1,3 +1,3 @@
-C:/Users/jwall/CLion 2023.2.2/ECE369/cmake-build-debug/CMakeFiles/ECE369.dir
-C:/Users/jwall/CLion 2023.2.2/ECE369/cmake-build-debug/CMakeFiles/edit_cache.dir
-C:/Users/jwall/CLion 2023.2.2/ECE369/cmake-build-debug/CMakeFiles/rebuild_cache.dir
+C:/Users/24bri/CLionProjects/ECE369L3/cmake-build-debug/CMakeFiles/ECE369.dir
+C:/Users/24bri/CLionProjects/ECE369L3/cmake-build-debug/CMakeFiles/edit_cache.dir
+C:/Users/24bri/CLionProjects/ECE369L3/cmake-build-debug/CMakeFiles/rebuild_cache.dir
