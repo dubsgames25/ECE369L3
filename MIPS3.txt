@@ -23,13 +23,9 @@ main:
     # Call SearchPattern
     jal SearchPattern
 
-    # Print results (For demonstration; you may need to replace this part)
-    # Here you would typically add logic to print out the lowest SAD indices
-    # For this example, we assume it's in $s1 and $s2
-
-    # Exit program
-    addi $v0, $zero, 10        # Exit code (usually 10 for exit)
-    syscall                    # Exit
+    # Exit program (you may need to replace this part)
+    addi $v0, $zero, 10        # Exit code (10 for exit)
+    syscall                     # Exit
 
 # Function: SAD
 # Computes the Sum of Absolute Differences (SAD)
@@ -98,7 +94,7 @@ SearchPattern:
     add $t7, $zero, $zero      # left = 0
     sub $t8, $t1, 1            # right = cols - 1
     add $t9, $zero, $zero      # direction = 0
-    li $s0, 2147483647         # lowestSAD = INT_MAX
+    addi $s0, $zero, 2147483647 # lowestSAD = INT_MAX
 
 SearchPattern_outer:
     bne $s0, $zero, SearchPattern_loop
@@ -153,4 +149,16 @@ MoveDown_loop:
     bge $v0, $s0, MoveDown_next # if tempSAD >= lowestSAD, skip
     add $s0, $v0, $zero        # lowestSAD = tempSAD
     add $s1, $t5, $zero        # lowestSADIndexI = i
-   
+    add $s2, $t1, $zero        # lowestSADIndexJ = j
+MoveDown_next:
+    addi $t5, $t5, 1          # i++
+    add $t9, $zero, $zero      # Reset direction to 0
+    j SearchPattern_outer
+
+MoveLeft:
+    # Add MoveLeft logic here
+    j SearchPattern_outer
+
+MoveUp:
+    # Add MoveUp logic here
+    j SearchPattern_outer
