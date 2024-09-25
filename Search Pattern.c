@@ -26,7 +26,6 @@ void ReadArr(int row, int col, int windowx, int windowy, int *frame, int *temp, 
     }
 }
 
-
 void SearchPattern(int *sizes, int *frame, int *window) {
     int rows = sizes[0];
     int cols = sizes[1];
