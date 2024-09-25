@@ -23,7 +23,7 @@ main:
     # Call SearchPattern
     jal SearchPattern
 
-    # Exit program (you may need to replace this part)
+    # Exit program (You may need to replace this part)
     addi $v0, $zero, 10        # Exit code (10 for exit)
     syscall                     # Exit
 
@@ -152,13 +152,61 @@ MoveDown_loop:
     add $s2, $t1, $zero        # lowestSADIndexJ = j
 MoveDown_next:
     addi $t5, $t5, 1          # i++
-    add $t9, $zero, $zero      # Reset direction to 0
+    addi $t9, $t9, 2          # direction = 2
     j SearchPattern_outer
 
 MoveLeft:
-    # Add MoveLeft logic here
+    # Implement MoveLeft logic
+    add $t0, $t6, $zero      # i = bottom
+    add $t1, $t8, $zero      # j = right
+MoveLeft_loop:
+    blt $t1, $t7, MoveLeft_next # if j < left, go to next
+    jal ReadArr            # ReadArr(i, j, windowx, windowy, frame, temp, cols)
+    add $a0, $t0, $zero
+    add $a1, $t1, $zero
+    add $a2, $t2, $zero
+    add $a3, $t3, $zero
+    add $a4, $a1, $zero
+    add $a5, $sp, $zero
+    add $a6, $t1, $zero
+    jal SAD               # tempSAD = SAD(temp, window, windowx * windowy)
+    # Compare tempSAD with lowestSAD
+    bge $v0, $s0, MoveLeft_next # if tempSAD >= lowestSAD, skip
+    add $s0, $v0, $zero        # lowestSAD = tempSAD
+    add $s1, $t0, $zero        # lowestSADIndexI = i
+    add $s2, $t1, $zero        # lowestSADIndexJ = j
+MoveLeft_next:
+    addi $t1, $t1, -1         # j--
+    j MoveLeft_loop
+
+    addi $t6, $t6, -1         # bottom--
+    addi $t9, $t9, 3          # direction = 3
     j SearchPattern_outer
 
 MoveUp:
-    # Add MoveUp logic here
+    # Implement MoveUp logic
+    add $t0, $t6, $zero      # i = bottom
+    add $t1, $t7, $zero      # j = left
+MoveUp_loop:
+    bgt $t0, $t5, MoveUp_next # if i < top, go to next
+    jal ReadArr            # ReadArr(i, j, windowx, windowy, frame, temp, cols)
+    add $a0, $t0, $zero
+    add $a1, $t1, $zero
+    add $a2, $t2, $zero
+    add $a3, $t3, $zero
+    add $a4, $a1, $zero
+    add $a5, $sp, $zero
+    add $a6, $t1, $zero
+    jal SAD               # tempSAD = SAD(temp, window, windowx * windowy)
+    # Compare tempSAD with lowestSAD
+    bge $v0, $s0, MoveUp_next # if tempSAD >= lowestSAD, skip
+    add $s0, $v0, $zero        # lowestSAD = tempSAD
+    add $s1, $t0, $zero        # lowestSADIndexI = i
+    add $s2, $t1, $zero        # lowestSADIndexJ = j
+MoveUp_next:
+    addi $t0, $t0, -1         # i--
+    j MoveUp_loop
+
+    addi $t7, $t7, 1          # left++
+    addi $t9, $t9, 0          # direction = 0
     j SearchPattern_outer
