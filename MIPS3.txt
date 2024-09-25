@@ -1,110 +1,100 @@
 .data
-# Test Case 1
-asize0:  .word  4, 4, 2, 2  # i, j, k, l
-frame0:  .word  0, 0, 1, 2
-         .word  0, 0, 3, 4
-         .word  0, 0, 0, 0
-         .word  0, 0, 0, 0
-window0: .word  1, 2
-         .word  3, 4
-
-# Test Case 2
-asize1:  .word  16, 16, 4, 4 # i, j, k, l
-frame1:  .word  0, 1, 2, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-         .word  1, 2, 3, 4, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15
-         .word  2, 3, 32, 1, 2, 3, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30
-         .word  3, 4, 1, 2, 3, 4, 18, 21, 24, 27, 30, 33, 36, 39, 42, 45
-         .word  0, 4, 2, 3, 4, 5, 24, 28, 32, 36, 40, 44, 48, 52, 56, 60
-         .word  0, 5, 3, 4, 5, 6, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75
-         .word  0, 6, 12, 18, 24, 30, 36, 42, 48, 54, 60, 66, 72, 78, 84, 90
-         .word  0, 4, 14, 21, 28, 35, 42, 49, 56, 63, 70, 77, 84, 91, 98, 105
-         .word  0, 8, 16, 24, 32, 40, 48, 56, 64, 72, 80, 88, 96, 104, 112, 120
-         .word  0, 9, 18, 27, 36, 45, 54, 63, 72, 81, 90, 99, 108, 117, 126, 135
-         .word  0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 130, 140, 150
-         .word  0, 11, 22, 33, 44, 55, 66, 77, 88, 99, 110, 121, 132, 143, 154, 165
-         .word  0, 12, 24, 36, 48, 60, 72, 84, 96, 108, 120, 132, 0, 1, 2, 3
-         .word  0, 13, 26, 39, 52, 65, 78, 91, 104, 114, 130, 143, 1, 2, 3, 4
-         .word  0, 14, 28, 42, 56, 70, 84, 98, 112, 126, 140, 154, 2, 3, 4, 5
-         .word  0, 15, 30, 45, 60, 75, 90, 105, 120, 135, 150, 165, 3, 4, 5, 6
-window1: .word  0, 1, 2, 3
-         .word  1, 2, 3, 4
-         .word  2, 3, 4, 5
-         .word  3, 4, 5, 6
+# Data section for test cases
+asize0: .word 4, 4, 2, 2        # Frame and window dimensions
+frame0: .word 0, 0, 1, 2        # Frame data
+         .word 0, 0, 3, 4
+         .word 0, 0, 0, 0
+         .word 0, 0, 0, 0
+window0: .word 1, 2            # Window data
+         .word 3, 4
 
 .text
 .globl main
 main:
     # Prologue
-    addi $sp, $sp, -16          # Adjust stack pointer
-    sw   $ra, 12($sp)           # Save return address
-    sw   $fp, 8($sp)            # Save frame pointer
-    move $fp, $sp               # Set frame pointer
+    addi $sp, $sp, -16           # Adjust stack pointer
+    sw   $ra, 12($sp)            # Save return address
+    sw   $fp, 8($sp)             # Save frame pointer
+    move $fp, $sp                # Set frame pointer
 
-    # Test first case
-    la   $t0, asize0            # Load address of asize0
-    lw   $t1, 0($t0)            # Load frame dimensions (4)
-    lw   $t2, 4($t0)            # Load window dimensions (4)
-    la   $t3, frame0            # Load address of frame0
-    la   $t4, window0           # Load address of window0
-    jal  FindMatch              # Find match in first test case
-    # Result for first case is now in $v0 (row) and $v1 (column)
-
-    # Test second case
-    la   $t0, asize1            # Load address of asize1
-    lw   $t1, 0($t0)            # Load frame dimensions (16)
-    lw   $t2, 4($t0)            # Load window dimensions (4)
-    la   $t3, frame1            # Load address of frame1
-    la   $t4, window1           # Load address of window1
-    jal  FindMatch              # Find match in second test case
-    # Result for second case is now in $v0 (row) and $v1 (column)
+    # Load test case
+    la   $t0, asize0             # Load address of asize0
+    lw   $t1, 0($t0)             # Load frame dimensions (4)
+    lw   $t2, 4($t0)             # Load window dimensions (2)
+    la   $t3, frame0             # Load address of frame0
+    la   $t4, window0            # Load address of window0
+    jal  FindMatch               # Find match in the test case
+    # Result for the test case is now in $v0 (row) and $v1 (column)
 
     # Epilogue
-    move $sp, $fp               # Restore stack pointer
-    lw   $ra, 12($sp)           # Restore return address
-    lw   $fp, 8($sp)            # Restore frame pointer
-    addi $sp, $sp, 16           # Adjust stack pointer back
-    jr   $ra                    # Return to caller
+    move $sp, $fp                # Restore stack pointer
+    lw   $ra, 12($sp)            # Restore return address
+    lw   $fp, 8($sp)             # Restore frame pointer
+    addi $sp, $sp, 16            # Adjust stack pointer back
+    jr   $ra                     # Return to caller
 
 # Function: FindMatch
 FindMatch:
-    # Inputs:
-    # $t1 = number of rows in the frame
-    # $t2 = number of rows in the window
-    # $t3 = address of the frame
-    # $t4 = address of the window
-    li   $t5, 0                 # Initialize row offset for the frame
+    li   $t5, 0                  # Initialize row offset for the frame
 loop_row:
-    li   $t6, 0                 # Initialize column offset for the frame
+    li   $t6, 0                  # Initialize column offset for the frame
 loop_col:
     # Check if the window matches at frame[t5][t6]
-    jal  MatchWindow            # Call MatchWindow
-    # If a match is found, $v0 = 1 (true), else $v0 = 0 (false)
+    jal  MatchWindow              # Call MatchWindow
     beq  $v0, $zero, continue_col # If no match, continue checking columns
 
     # Match found, return indices
-    move $v0, $t5               # Save row index
-    move $v1, $t6               # Save column index
-    jr   $ra                    # Return to caller
+    move $v0, $t5                 # Save row index
+    move $v1, $t6                 # Save column index
+    jr   $ra                      # Return to caller
 
 continue_col:
-    addi $t6, $t6, 1            # Increment column index
-    li   $t7, 12                # Adjust based on frame size - window size (for 4x4 in 16x16)
-    bge  $t6, $t7, next_row     # If column index exceeds limit, go to next row
-    j    loop_col               # Continue checking columns
+    addi $t6, $t6, 1              # Increment column index
+    sub  $t7, $t1, $t2            # Calculate max column index
+    blt  $t6, $t7, loop_col       # If column index is within limits, continue checking columns
 
 next_row:
-    addi $t5, $t5, 1            # Increment row index
-    li   $t8, 12                # Adjust based on frame size - window size (for 4x4 in 16x16)
-    bge  $t5, $t8, end_find     # If row index exceeds limit, end search
-    j    loop_row               # Continue checking rows
+    addi $t5, $t5, 1              # Increment row index
+    sub  $t8, $t1, $t2            # Calculate max row index
+    blt  $t5, $t8, loop_row       # If row index is within limits, continue checking rows
 
 end_find:
-    li   $v0, 0                 # No match found
-    jr   $ra                    # Return to caller
+    li   $v0, 0                   # No match found
+    jr   $ra                       # Return to caller
 
 # Function: MatchWindow
-# Checks if the window matches at the current position in the frame
 MatchWindow:
-    li   $t0, 0                 # Initialize row index for window
+    li   $t0, 0                   # Initialize row index for window
 match_rows:
-    li   $t
+    li   $t1, 0                   # Initialize column index for window
+inner_loop:
+    # Calculate frame index
+    mul  $t2, $t0, 4              # $t2 = row index * 4 (size of each word)
+    add  $t2, $t2, $t5            # Add current frame row index offset
+    mul  $t3, $t1, 4              # $t3 = column index * 4 (size of each word)
+    add  $t2, $t2, $t3            # Frame index = frame base + row offset + column offset
+
+    # Calculate window index
+    la   $t4, window0             # Load address of window
+    add  $t4, $t4, $t0            # Add window row index offset
+    mul  $t4, $t4, 4              # Offset to window row
+    add  $t4, $t4, $t1            # Add column offset for window
+    lw   $t4, 0($t4)              # Load window value
+
+    lw   $t5, 0($t2)              # Load frame value
+    bne  $t4, $t5, no_match       # If values don't match, jump to no_match
+
+    # Check next column in the window
+    addi $t1, $t1, 1              # Increment window column index
+    bne  $t1, $t2, inner_loop     # Continue for all columns in the window
+
+    # Check next row in the window
+    addi $t0, $t0, 1              # Increment window row index
+    bne  $t0, $t2, match_rows     # Continue for all rows in the window
+
+    li   $v0, 1                   # Match found
+    jr   $ra                       # Return to caller
+
+no_match:
+    li   $v0, 0                   # No match found
+    jr   $ra                       # Return to caller
