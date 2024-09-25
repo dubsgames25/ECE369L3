@@ -1,5 +1,7 @@
 text
-.globl SearchPattern
+.globl 
+
+#SearchPattern
 
 SearchPattern:
     # Allocate stack space and save registers
