@@ -11,6 +11,26 @@ msg:       .asciiz "Lowest SAD indices: "
 .text
 .globl main
 
+main:
+    # Initialize stack pointer
+    addi $sp, $sp, -8          # Create space for stack
+
+    # Load addresses of data
+    la $a0, asize0             # Address of asize0
+    la $a1, frame0             # Address of frame0
+    la $a2, window0            # Address of window0
+
+    # Call SearchPattern
+    jal SearchPattern
+
+    # Print results (For demonstration; you may need to replace this part)
+    # Here you would typically add logic to print out the lowest SAD indices
+    # For this example, we assume it's in $s1 and $s2
+
+    # Exit program
+    addi $v0, $zero, 10        # Exit code (usually 10 for exit)
+    syscall                    # Exit
+
 # Function: SAD
 # Computes the Sum of Absolute Differences (SAD)
 SAD:
@@ -133,21 +153,4 @@ MoveDown_loop:
     bge $v0, $s0, MoveDown_next # if tempSAD >= lowestSAD, skip
     add $s0, $v0, $zero        # lowestSAD = tempSAD
     add $s1, $t5, $zero        # lowestSADIndexI = i
-    add $s2, $t1, $zero        # lowestSADIndexJ = j
-MoveDown_next:
-    addi $t5, $t5, 1          # i++
-    j MoveDown_loop
-
-    sub $t8, $t8, 1           # right--
-    addi $t9, $t9, 2          # direction = 2
-    j SearchPattern_outer
-
-MoveLeft:
-    add $t5, $t6, $zero       # i = bottom
-MoveLeft_loop:
-    blt $t5, $t7, MoveLeft_next # if i < left, go to next
-    jal ReadArr            # ReadArr(i, j, windowx, windowy, frame, temp, cols)
-    add $a0, $t5, $zero
-    add $a1, $t1, $zero
-    add $a2, $t2, $zero
-    add $a3, $t
+   
