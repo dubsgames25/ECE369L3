@@ -19,10 +19,12 @@ main:
 
     # Load test case
     la   $t0, asize0             # Load address of asize0
-    lw   $t1, 0($t0)             # Load frame dimensions (4)
-    lw   $t2, 4($t0)             # Load window dimensions (2)
-    la   $t3, frame0             # Load address of frame0
-    la   $t4, window0            # Load address of window0
+    lw   $t1, 0($t0)             # Load frame dimensions (rows = 4)
+    lw   $t2, 1($t0)             # Load frame dimensions (cols = 4)
+    lw   $t3, 2($t0)             # Load window dimensions (rows = 2)
+    lw   $t4, 3($t0)             # Load window dimensions (cols = 2)
+    la   $t5, frame0             # Load address of frame0
+    la   $t6, window0            # Load address of window0
     jal  FindMatch               # Find match in the test case
     # Result for the test case is now in $v0 (row) and $v1 (column)
 
@@ -35,28 +37,28 @@ main:
 
 # Function: FindMatch
 FindMatch:
-    li   $t5, 0                  # Initialize row offset for the frame
+    li   $t7, 0                  # Initialize row offset for the frame
 loop_row:
-    li   $t6, 0                  # Initialize column offset for the frame
+    li   $t8, 0                  # Initialize column offset for the frame
 loop_col:
-    # Check if the window matches at frame[t5][t6]
+    # Check if the window matches at frame[t7][t8]
     jal  MatchWindow              # Call MatchWindow
     beq  $v0, $zero, continue_col # If no match, continue checking columns
 
     # Match found, return indices
-    move $v0, $t5                 # Save row index
-    move $v1, $t6                 # Save column index
+    move $v0, $t7                 # Save row index
+    move $v1, $t8                 # Save column index
     jr   $ra                      # Return to caller
 
 continue_col:
-    addi $t6, $t6, 1              # Increment column index
-    sub  $t7, $t1, $t2            # Calculate max column index
-    blt  $t6, $t7, loop_col       # If column index is within limits, continue checking columns
+    addi $t8, $t8, 1              # Increment column index
+    sub  $t9, $t2, $t4            # Calculate max column index
+    blt  $t8, $t9, loop_col       # If column index is within limits, continue checking columns
 
 next_row:
-    addi $t5, $t5, 1              # Increment row index
-    sub  $t8, $t1, $t2            # Calculate max row index
-    blt  $t5, $t8, loop_row       # If row index is within limits, continue checking rows
+    addi $t7, $t7, 1              # Increment row index
+    sub  $t0, $t1, $t3            # Calculate max row index
+    blt  $t7, $t0, loop_row       # If row index is within limits, continue checking rows
 
 end_find:
     li   $v0, 0                   # No match found
@@ -69,28 +71,26 @@ match_rows:
     li   $t1, 0                   # Initialize column index for window
 inner_loop:
     # Calculate frame index
-    mul  $t2, $t0, 4              # $t2 = row index * 4 (size of each word)
-    add  $t2, $t2, $t5            # Add current frame row index offset
-    mul  $t3, $t1, 4              # $t3 = column index * 4 (size of each word)
-    add  $t2, $t2, $t3            # Frame index = frame base + row offset + column offset
+    mul  $t2, $t7, $t2            # $t2 = current frame row * cols (4)
+    add  $t2, $t2, $t8            # Frame index = frame row + column offset
+    sll  $t2, $t2, 2               # Multiply by 4 for word offset (4 bytes)
 
     # Calculate window index
-    la   $t4, window0             # Load address of window
-    add  $t4, $t4, $t0            # Add window row index offset
-    mul  $t4, $t4, 4              # Offset to window row
-    add  $t4, $t4, $t1            # Add column offset for window
-    lw   $t4, 0($t4)              # Load window value
+    mul  $t3, $t0, $t4            # $t3 = current window row * window cols (2)
+    add  $t3, $t3, $t1            # Add column index
+    sll  $t3, $t3, 2               # Multiply by 4 for word offset (4 bytes)
 
-    lw   $t5, 0($t2)              # Load frame value
+    lw   $t4, frame0($t2)         # Load frame value
+    lw   $t5, window0($t3)        # Load window value
     bne  $t4, $t5, no_match       # If values don't match, jump to no_match
 
     # Check next column in the window
     addi $t1, $t1, 1              # Increment window column index
-    bne  $t1, $t2, inner_loop     # Continue for all columns in the window
+    bne  $t1, $t4, inner_loop     # Continue for all columns in the window
 
     # Check next row in the window
     addi $t0, $t0, 1              # Increment window row index
-    bne  $t0, $t2, match_rows     # Continue for all rows in the window
+    bne  $t0, $t3, match_rows     # Continue for all rows in the window
 
     li   $v0, 1                   # Match found
     jr   $ra                       # Return to caller
