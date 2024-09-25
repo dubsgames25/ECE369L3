@@ -780,143 +780,315 @@ vbsme:
     li      $v1, 0
 
     # insert your code here
+
 # SearchPattern ################################################################################################################    
 .text
 .globl SearchPattern
+
 SearchPattern:
     # Allocate stack space and save registers
-    addi $sp, $sp, -48           # Allocate space for saving registers
-    sw   $ra, 44($sp)            # Save return address
-    sw   $s0, 40($sp)            # Save s0 (frame pointer)
-    sw   $s1, 36($sp)            # Save s1 (window pointer)
-    sw   $s2, 32($sp)            # Save s2 (temp pointer)
-    sw   $s3, 28($sp)            # Save s3 (rows)
-    sw   $s4, 24($sp)            # Save s4 (cols)
-    sw   $s5, 20($sp)            # Save s5 (top)
-    sw   $s6, 16($sp)            # Save s6 (bottom)
-    sw   $s7, 12($sp)            # Save s7 (left)
-    sw   $t0, 8($sp)             # Save t0 (right)
-    sw   $t1, 4($sp)             # Save t1 (direction)
+    addi $sp, $sp, -80  # Increased stack space
+    sw $ra, 76($sp)
+    sw $s0, 72($sp)
+    sw $s1, 68($sp)
+    sw $s2, 64($sp)
+    sw $s3, 60($sp)
+    sw $s4, 56($sp)
+    sw $s5, 52($sp)
+    sw $s6, 48($sp)
+    sw $s7, 44($sp)
 
-    # Input parameters: framex = $a0, framey = $a1, windowx = $a2, windowy = $a3
-    # frame pointer in $s0, window pointer in $s1
+    # Load function arguments
+    move $s0, $a0  # sizes array pointer
+    move $s1, $a1  # frame array pointer
+    move $s2, $a2  # window array pointer
 
-    # Allocate memory for temp array (similar to malloc)
-    mul  $t2, $a2, $a3           # t2 = windowx * windowy
-    li   $t3, 4                  # sizeof(int) = 4
-    mul  $t2, $t2, $t3           # t2 = windowx * windowy * sizeof(int)
-    li   $v0, 9                  # syscall 9 (sbrk/malloc equivalent)
-    move $a0, $t2                # argument to syscall: size of array
-    syscall                      # syscall to allocate memory
-    move $s2, $v0                # store the pointer to temp in $s2
+    # Load sizes
+    lw $t0, 0($s0)   # rows = sizes[0];
+    lw $t1, 4($s0)   # cols = sizes[1];
+    lw $t2, 8($s0)   # windowx = sizes[2];
+    lw $t3, 12($s0)  # windowy = sizes[3];
+
+    # Store sizes on stack for later use
+    sw $t0, 40($sp)  # rows
+    sw $t1, 36($sp)  # cols
+    sw $t2, 32($sp)  # windowx
+    sw $t3, 28($sp)  # windowy
+
+    # Allocate memory for temp array
+    mul $t4, $t2, $t3
+    sll $t4, $t4, 2  # Multiply by 4 for int size
+    move $a0, $t4
+    li $v0, 9        # syscall for memory allocation
+    syscall
+    move $s3, $v0    # temp array pointer
 
     # Initialize variables
-    move $s3, $a0                # rows = framex
-    move $s4, $a1                # cols = framey
-    li   $s5, 0                  # top = 0
-    add  $s6, $s3, -1            # bottom = framex - 1
-    li   $s7, 0                  # left = 0
-    add  $t0, $s4, -1            # right = framey - 1
-    li   $t1, 0                  # direction = 0
+    li $t4, 0        # int top = 0;
+    addi $t5, $t0, -1  # int bottom = rows - 1;
+    li $t6, 0        # int left = 0;
+    addi $t7, $t1, -1  # int right = cols - 1;
+    li $s4, 0        # int direction = 0;
+    li $s5, 2147483647  # int lowestSAD = INT_MAX;
+    li $s6, 0        # int lowestSADIndexI = 0;
+    li $s7, 0        # int lowestSADIndexJ = 0;
 
-    # Initialize lowestSAD to INT_MAX (0x7FFFFFFF)
-    li   $t2, 0x7FFFFFFF         # lowestSAD = INT_MAX
-    li   $t3, 0                  # lowestSADIndexI = 0
-    li   $t4, 0                  # lowestSADIndexJ = 0
+    # Store these on stack
+    sw $t4, 24($sp)  # top
+    sw $t5, 20($sp)  # bottom
+    sw $t6, 16($sp)  # left
+    sw $t7, 12($sp)  # right
 
-    # Main loop: while (top <= bottom && left <= right)
-WhileLoop:
-    ble  $s5, $s6, CheckLeftRight
-    b    EndLoop                 # Exit if top > bottom
+    # Main loop
+main_loop:
+    # while (top <= bottom && left <= right) {
+    lw $t4, 24($sp)  # Load top
+    lw $t5, 20($sp)  # Load bottom
+    lw $t6, 16($sp)  # Load left
+    lw $t7, 12($sp)  # Load right
+    bgt $t4, $t5, end_main_loop  # if (top > bottom) exit loop
+    bgt $t6, $t7, end_main_loop  # if (left > right) exit loop
 
-CheckLeftRight:
-    ble  $s7, $t0, LoopBody
-    b    EndLoop                 # Exit if left > right
+    beq $s4, 0, move_right
+    beq $s4, 1, move_down
+    beq $s4, 2, move_left
+    beq $s4, 3, move_up
 
-LoopBody:
-    # Check direction (0: Move right, 1: Move down, 2: Move left, 3: Move up)
-    beq  $t1, 0, MoveRight       # Move right
-    beq  $t1, 1, MoveDown        # Move down
-    beq  $t1, 2, MoveLeft        # Move left
-    beq  $t1, 3, MoveUp          # Move up
+move_right:
+    # if (direction == 0) {  // Move right
+    lw $t4, 24($sp)  # Load top
+    lw $t6, 16($sp)  # Load left
+    lw $t7, 12($sp)  # Load right
+    move $t8, $t4    # i = top;
+    move $t9, $t6    # j = left;
+move_right_loop:
+    bgt $t9, $t7, end_move_right  # if (j > right) exit loop
+    
+    # ReadArr(i, j, windowx, windowy, frame, temp, cols);
+    move $a0, $t8
+    move $a1, $t9
+    lw $a2, 32($sp)  # windowx
+    lw $a3, 28($sp)  # windowy
+    sw $s1, 8($sp)   # frame
+    sw $s3, 4($sp)   # temp
+    lw $t0, 36($sp)  # cols
+    sw $t0, 0($sp)
+    jal ReadArr
 
-MoveRight:
-    move $t6, $s5                # i = top
-    move $t7, $s7                # j = left
-MoveRightLoop:
-    ble  $t7, $t0, ProcessRight
-    b    DoneMoveRight
+    # tempSAD = SAD(temp, window, windowx * windowy);
+    move $a0, $s3
+    move $a1, $s2
+    lw $t0, 32($sp)  # windowx
+    lw $t1, 28($sp)  # windowy
+    mul $a2, $t0, $t1
+    jal SAD
+    move $t0, $v0    # tempSAD = SAD(...)
 
-ProcessRight:
-    # Call ReadArr(i, j, windowx, windowy, frame, temp, cols)
-    move $a0, $t6                # i
-    move $a1, $t7                # j
-    move $a2, $a2                # windowx
-    move $a3, $a3                # windowy
-    move $t0, $s0                # frame
-    move $t1, $s2                # temp
-    move $t2, $s4                # cols (frame width)
-    jal  ReadArr                 # Call ReadArr
+    # if (tempSAD < lowestSAD) {
+    #     lowestSAD = tempSAD;
+    #     lowestSADIndexI = i;
+    #     lowestSADIndexJ = j;
+    # }
+    bge $t0, $s5, skip_update_right
+    move $s5, $t0
+    move $s6, $t8
+    move $s7, $t9
+skip_update_right:
+    addi $t9, $t9, 1  # j++
+    j move_right_loop
 
-    # Call SAD(temp, window, windowx * windowy)
-    move $a0, $s2                # temp
-    move $a1, $s1                # window
-    mul  $a2, $a2, $a3           # windowx * windowy
-    jal  SAD                     # Call SAD
-    move $t5, $v0                # tempSAD = SAD result
+end_move_right:
+    lw $t4, 24($sp)  # Load top
+    addi $t4, $t4, 1  # top++;
+    sw $t4, 24($sp)  # Store updated top
+    li $s4, 1         # direction = 1;
+    j main_loop
 
-    # if (tempSAD < lowestSAD)
-    blt  $t5, $t2, UpdateLowestSAD
-    b    SkipUpdate
+move_down:
+    # } else if (direction == 1) {  // Move down
+    lw $t4, 24($sp)  # Load top
+    lw $t5, 20($sp)  # Load bottom
+    lw $t7, 12($sp)  # Load right
+    lw $t0, 32($sp)  # Load windowx
+    sub $t9, $t7, $t0
+    addi $t9, $t9, 1  # j = right - windowx + 1;
+    move $t8, $t4     # i = top;
+move_down_loop:
+    bgt $t8, $t5, end_move_down  # if (i > bottom) exit loop
+    
+    # ReadArr(i, j, windowx, windowy, frame, temp, cols);
+    move $a0, $t8
+    move $a1, $t9
+    lw $a2, 32($sp)  # windowx
+    lw $a3, 28($sp)  # windowy
+    sw $s1, 8($sp)   # frame
+    sw $s3, 4($sp)   # temp
+    lw $t0, 36($sp)  # cols
+    sw $t0, 0($sp)
+    jal ReadArr
 
-UpdateLowestSAD:
-    move $t2, $t5                # lowestSAD = tempSAD
-    move $t3, $t6                # lowestSADIndexI = i
-    move $t4, $t7                # lowestSADIndexJ = j
+    # tempSAD = SAD(temp, window, windowx * windowy);
+    move $a0, $s3
+    move $a1, $s2
+    lw $t0, 32($sp)  # windowx
+    lw $t1, 28($sp)  # windowy
+    mul $a2, $t0, $t1
+    jal SAD
+    move $t0, $v0    # tempSAD = SAD(...)
 
-SkipUpdate:
-    addi $t7, $t7, 1             # j++
-    b    MoveRightLoop           # Continue loop
+    # if (tempSAD < lowestSAD) {
+    #     lowestSAD = tempSAD;
+    #     lowestSADIndexI = i;
+    #     lowestSADIndexJ = j;
+    # }
+    bge $t0, $s5, skip_update_down
+    move $s5, $t0
+    move $s6, $t8
+    move $s7, $t9
+skip_update_down:
+    addi $t8, $t8, 1  # i++
+    j move_down_loop
 
-DoneMoveRight:
-    addi $s5, $s5, 1             # top++
-    li   $t1, 1                  # direction = 1
-    b    WhileLoop               # Go back to main loop
+end_move_down:
+    lw $t7, 12($sp)  # Load right
+    addi $t7, $t7, -1  # right--;
+    sw $t7, 12($sp)  # Store updated right
+    li $s4, 2         # direction = 2;
+    j main_loop
 
-MoveDown:
-    # Similar logic for moving down
+move_left:
+    # } else if (direction == 2) {  // Move left
+    lw $t5, 20($sp)  # Load bottom
+    lw $t6, 16($sp)  # Load left
+    lw $t7, 12($sp)  # Load right
+    move $t8, $t5    # i = bottom;
+    move $t9, $t7    # j = right;
+move_left_loop:
+    blt $t9, $t6, end_move_left  # if (j < left) exit loop
+    
+    # ReadArr(i, j, windowx, windowy, frame, temp, cols);
+    move $a0, $t8
+    move $a1, $t9
+    lw $a2, 32($sp)  # windowx
+    lw $a3, 28($sp)  # windowy
+    sw $s1, 8($sp)   # frame
+    sw $s3, 4($sp)   # temp
+    lw $t0, 36($sp)  # cols
+    sw $t0, 0($sp)
+    jal ReadArr
 
-MoveLeft:
-    # Similar logic for moving left
+    # tempSAD = SAD(temp, window, windowx * windowy);
+    move $a0, $s3
+    move $a1, $s2
+    lw $t0, 32($sp)  # windowx
+    lw $t1, 28($sp)  # windowy
+    mul $a2, $t0, $t1
+    jal SAD
+    move $t0, $v0    # tempSAD = SAD(...)
 
-MoveUp:
-    # Similar logic for moving up
+    # if (tempSAD < lowestSAD) {
+    #     lowestSAD = tempSAD;
+    #     lowestSADIndexI = i;
+    #     lowestSADIndexJ = j;
+    # }
+    bge $t0, $s5, skip_update_left
+    move $s5, $t0
+    move $s6, $t8
+    move $s7, $t9
+skip_update_left:
+    addi $t9, $t9, -1  # j--
+    j move_left_loop
 
-EndLoop:
-    # Output the result (print lowestSADIndexI and lowestSADIndexJ)
-    move $a0, $t3                # lowestSADIndexI
-    move $a1, $t4                # lowestSADIndexJ
-    jal  PrintResult             # Call print function (assuming this exists)
+end_move_left:
+    lw $t5, 20($sp)  # Load bottom
+    addi $t5, $t5, -1  # bottom--;
+    sw $t5, 20($sp)  # Store updated bottom
+    li $s4, 3         # direction = 3;
+    j main_loop
 
-    # Free temp array memory
-    move $a0, $s2                # temp pointer
-    li   $v0, 10                 # syscall for free (assumed to be syscall 10)
+move_up:
+    # } else if (direction == 3) {  // Move up
+    lw $t4, 24($sp)  # Load top
+    lw $t5, 20($sp)  # Load bottom
+    lw $t6, 16($sp)  # Load left
+    move $t8, $t5    # i = bottom;
+    move $t9, $t6    # j = left;
+move_up_loop:
+    blt $t8, $t4, end_move_up  # if (i < top) exit loop
+    
+    # ReadArr(i, j, windowx, windowy, frame, temp, cols);
+    move $a0, $t8
+    move $a1, $t9
+    lw $a2, 32($sp)  # windowx
+    lw $a3, 28($sp)  # windowy
+    sw $s1, 8($sp)   # frame
+    sw $s3, 4($sp)   # temp
+    lw $t0, 36($sp)  # cols
+    sw $t0, 0($sp)
+    jal ReadArr
+
+    # tempSAD = SAD(temp, window, windowx * windowy);
+    move $a0, $s3
+    move $a1, $s2
+    lw $t0, 32($sp)  # windowx
+    lw $t1, 28($sp)  # windowy
+    mul $a2, $t0, $t1
+    jal SAD
+    move $t0, $v0    # tempSAD = SAD(...)
+
+    # if (tempSAD < lowestSAD) {
+    #     lowestSAD = tempSAD;
+    #     lowestSADIndexI = i;
+    #     lowestSADIndexJ = j;
+    # }
+    bge $t0, $s5, skip_update_up
+    move $s5, $t0
+    move $s6, $t8
+    move $s7, $t9
+skip_update_up:
+    addi $t8, $t8, -1  # i--
+    j move_up_loop
+
+end_move_up:
+    lw $t6, 16($sp)  # Load left
+    addi $t6, $t6, 1  # left++;
+    sw $t6, 16($sp)  # Store updated left
+    li $s4, 0         # direction = 0;
+    j main_loop
+
+end_main_loop:
+    # printf("%d, %d\n", lowestSADIndexI, lowestSADIndexJ);
+    li $v0, 1
+    move $a0, $s6
+    syscall
+    li $v0, 4
+    la $a0, comma_space
+    syscall
+    li $v0, 1
+    move $a0, $s7
+    syscall
+    li $v0, 4
+    la $a0, newline
     syscall
 
-    # Restore saved registers and return
-    lw   $ra, 44($sp)
-    lw   $s0, 40($sp)
-    lw   $s1, 36($sp)
-    lw   $s2, 32($sp)
-    lw   $s3, 28($sp)
-    lw   $s4, 24($sp)
-    lw   $s5, 20($sp)
-    lw   $s6, 16($sp)
-    lw   $s7, 12($sp)
-    lw   $t0, 8($sp)
-    lw   $t1, 4($sp)
-    addi $sp, $sp, 48            # Deallocate stack space
-    jr   $ra                     # Return
+    # free(temp);
+    move $a0, $s3
+    li $v0, 9    # syscall for memory deallocation
+    syscall
+
+    # Restore registers and return
+    lw $s7, 44($sp)
+    lw $s6, 48($sp)
+    lw $s5, 52($sp)
+    lw $s4, 56($sp)
+    lw $s3, 60($sp)
+    lw $s2, 64($sp)
+    lw $s1, 68($sp)
+    lw $s0, 72($sp)
+    lw $ra, 76($sp)
+    addi $sp, $sp, 80
+    jr $ra
+
 # SAD (Sum of Absolute Differences) function ############################################################################################
 .text
 .globl SAD
