@@ -19,13 +19,13 @@ main:
 
     # Load test case
     la   $t0, asize0             # Load address of asize0
-    lw   $t1, 0($t0)             # Load frame dimensions (rows = 4)
-    lw   $t2, 1($t0)             # Load frame dimensions (cols = 4)
-    lw   $t3, 2($t0)             # Load window dimensions (rows = 2)
-    lw   $t4, 3($t0)             # Load window dimensions (cols = 2)
+    lw   $t1, 0($t0)             # Load frame rows (4)
+    lw   $t2, 1($t0)             # Load frame columns (4)
+    lw   $t3, 2($t0)             # Load window rows (2)
+    lw   $t4, 3($t0)             # Load window columns (2)
     la   $t5, frame0             # Load address of frame0
     la   $t6, window0            # Load address of window0
-    jal  FindMatch               # Find match in the test case
+    jal  FindMatch                # Find match in the test case
     # Result for the test case is now in $v0 (row) and $v1 (column)
 
     # Epilogue
@@ -52,12 +52,12 @@ loop_col:
 
 continue_col:
     addi $t8, $t8, 1              # Increment column index
-    sub  $t9, $t2, $t4            # Calculate max column index
+    sub  $t9, $t2, $t4            # Calculate maximum column index
     blt  $t8, $t9, loop_col       # If column index is within limits, continue checking columns
 
 next_row:
     addi $t7, $t7, 1              # Increment row index
-    sub  $t0, $t1, $t3            # Calculate max row index
+    sub  $t0, $t1, $t3            # Calculate maximum row index
     blt  $t7, $t0, loop_row       # If row index is within limits, continue checking rows
 
 end_find:
@@ -71,14 +71,14 @@ match_rows:
     li   $t1, 0                   # Initialize column index for window
 inner_loop:
     # Calculate frame index
-    mul  $t2, $t7, $t2            # $t2 = current frame row * cols (4)
+    mul  $t2, $t7, 4              # $t2 = current frame row * 4 (size of word)
     add  $t2, $t2, $t8            # Frame index = frame row + column offset
-    sll  $t2, $t2, 2               # Multiply by 4 for word offset (4 bytes)
+    sll  $t2, $t2, 2               # Multiply by 4 for word offset (in bytes)
 
     # Calculate window index
-    mul  $t3, $t0, $t4            # $t3 = current window row * window cols (2)
+    mul  $t3, $t0, 4              # $t3 = current window row * 4 (size of word)
     add  $t3, $t3, $t1            # Add column index
-    sll  $t3, $t3, 2               # Multiply by 4 for word offset (4 bytes)
+    sll  $t3, $t3, 2               # Multiply by 4 for word offset (in bytes)
 
     lw   $t4, frame0($t2)         # Load frame value
     lw   $t5, window0($t3)        # Load window value
