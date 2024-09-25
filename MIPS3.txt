@@ -23,8 +23,8 @@ main:
     # Call SearchPattern
     jal SearchPattern
 
-    # Exit program (You may need to replace this part)
-    addi $v0, $zero, 10        # Exit code (10 for exit)
+    # Exit program
+    li $v0, 10                 # Exit code (10 for exit)
     syscall                     # Exit
 
 # Function: SAD
@@ -57,22 +57,24 @@ ReadArr:
     add $t0, $zero, $zero   # i = 0
 
 ReadArr_outer:
-    beq $t0, $a2, ReadArr_end  # if i == windowx, return
+    bge $t0, $a2, ReadArr_end  # if i == windowx, return
     add $t1, $zero, $zero      # j = 0
 
 ReadArr_inner:
-    beq $t1, $a3, ReadArr_next_i  # if j == windowy, go to next i
-    mul $t2, $t0, $a3        # i * windowy
-    add $t2, $t2, $t1         # i * windowy + j
-    mul $t3, $a4, $t0         # row * frameWidth
-    add $t3, $t3, $a1         # row * frameWidth + col
-    lw $t4, 0($t3)            # frame[(row + i) * frameWidth + (col + j)]
-    sw $t4, 0($a5)            # temp[i * windowy + j]
-    addi $t1, $t1, 1          # j++
+    bge $t1, $a3, ReadArr_next_i  # if j == windowy, go to next i
+    # Calculate the index for temp
+    mul $t2, $t0, $a3          # i * windowy
+    add $t2, $t2, $t1           # i * windowy + j
+    # Calculate the index for frame
+    mul $t3, $a4, $t0           # row * frameWidth
+    add $t3, $t3, $a1           # row * frameWidth + col
+    lw $t4, 0($t3)              # frame[(row + i) * frameWidth + (col + j)]
+    sw $t4, 0($a5)              # temp[i * windowy + j]
+    addi $t1, $t1, 1            # j++
     j ReadArr_inner
 
 ReadArr_next_i:
-    addi $t0, $t0, 1          # i++
+    addi $t0, $t0, 1            # i++
     j ReadArr_outer
 
 ReadArr_end:
@@ -152,13 +154,16 @@ MoveDown_loop:
     add $s2, $t1, $zero        # lowestSADIndexJ = j
 MoveDown_next:
     addi $t5, $t5, 1          # i++
+    j MoveDown_loop
+
+    addi $t8, $t8, -1         # right--
     addi $t9, $t9, 2          # direction = 2
     j SearchPattern_outer
 
 MoveLeft:
     # Implement MoveLeft logic
     add $t0, $t6, $zero      # i = bottom
-    add $t1, $t8, $zero      # j = right
+    add $t1, $t7, $zero      # j = right
 MoveLeft_loop:
     blt $t1, $t7, MoveLeft_next # if j < left, go to next
     jal ReadArr            # ReadArr(i, j, windowx, windowy, frame, temp, cols)
@@ -210,3 +215,4 @@ MoveUp_next:
     addi $t7, $t7, 1          # left++
     addi $t9, $t9, 0          # direction = 0
     j SearchPattern_outer
+
