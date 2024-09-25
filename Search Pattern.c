@@ -40,7 +40,7 @@ void SearchPattern(int *sizes, int *frame, int *window) {
     int tempSAD = 0;
     int i, j;
 
-    while (top <= bottom && left <= right) {
+    while (lowestSAD!=0) {
         if (direction == 0) {  // Move right
             i = top;
             for (j = left; j <= right; j++) {
@@ -97,6 +97,8 @@ void SearchPattern(int *sizes, int *frame, int *window) {
     printf("%d, %d\n", lowestSADIndexI, lowestSADIndexJ);
     free(temp);
 }
+
+
 
 int main(){
     //Test 0
