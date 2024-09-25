@@ -1,11 +1,13 @@
 .data
     msg: .asciiz "%d, %d\n"
+    asize0: .word 4, 4, 2, 2
+    frame0: .word 0, 0, 1, 2, 0, 0, 3, 4, 0, 0, 0, 0, 0, 0, 0, 0
+    window0: .word 1, 2, 3, 4
 
 .text
 .globl main
 
 # Function: SAD
-# Arguments: $a0 = temp pointer, $a1 = window pointer, $a2 = size
 SAD:
     li $t0, 0          # sum = 0
     li $t1, 0          # windowSum = 0
@@ -28,24 +30,23 @@ SAD_end:
     jr $ra
 
 # Function: ReadArr
-# Arguments: $a0 = row, $a1 = col, $a2 = windowx, $a3 = windowy, $a4 = frame pointer, $a5 = temp pointer, $a6 = frameWidth
 ReadArr:
-    move $t0, $zero      # i = 0
+    li $t0, 0             # i = 0
 
 ReadArr_outer:
     bge $t0, $a2, ReadArr_end  # if i >= windowx, exit loop
-    move $t1, $zero      # j = 0
+    li $t1, 0             # j = 0
 
 ReadArr_inner:
     bge $t1, $a3, ReadArr_outer_inc  # if j >= windowy, exit inner loop
-    mul $t2, $t0, $a3    # i * windowy
+    mul $t2, $t0, $a3     # i * windowy
     add $t2, $t2, $t1     # i * windowy + j
-    mul $t3, $a0, $a6     # row * frameWidth
-    add $t3, $t3, $t1     # row * frameWidth + col
-    lw $t4, 0($a4)        # Load frame[row * frameWidth + col]
-    sw $t4, 0($a5)        # Store in temp[i * windowy + j]
-    
-    addi $a4, $a4, 4      # frame++
+    mul $t3, $a0, $a4     # (row + i) * frameWidth
+    add $t3, $t3, $t1     # (row + i) * frameWidth + (col + j)
+    lw $t4, 0($a5)        # Load frame[...]
+    sw $t4, 0($a1)        # Store in temp[i * windowy + j]
+
+    addi $a5, $a5, 4      # frame++
     addi $t1, $t1, 1      # j++
     j ReadArr_inner
 
@@ -57,7 +58,6 @@ ReadArr_end:
     jr $ra
 
 # Function: SearchPattern
-# Arguments: $a0 = sizes pointer, $a1 = frame pointer, $a2 = window pointer
 SearchPattern:
     lw $t0, 0($a0)        # rows
     lw $t1, 4($a0)        # cols
@@ -99,9 +99,8 @@ SearchPattern_readarr_right:
     move $a1, $t8          # col
     move $a2, $t2          # windowx
     move $a3, $t3          # windowy
-    move $a4, $a1          # frame
+    move $a4, $t1          # frameWidth
     move $a5, $t5          # temp
-    move $a6, $t1          # frameWidth
     jal ReadArr
 
     mul $t0, $t2, $t3      # windowx * windowy
@@ -130,7 +129,7 @@ SearchPattern_down:
     move $t7, $zero        # i = top
 
 SearchPattern_down_loop:
-    ble $t7, $t7, SearchPattern_readarr_down
+    ble $t7, $t7, SearchPattern_readarr_down # j <= right
     j SearchPattern_next_direction
 
 SearchPattern_readarr_down:
@@ -138,9 +137,8 @@ SearchPattern_readarr_down:
     move $a1, $t8          # col
     move $a2, $t2          # windowx
     move $a3, $t3          # windowy
-    move $a4, $a1          # frame
+    move $a4, $t1          # frameWidth
     move $a5, $t5          # temp
-    move $a6, $t1          # frameWidth
     jal ReadArr
 
     mul $t0, $t2, $t3      # windowx * windowy
@@ -164,7 +162,7 @@ SearchPattern_left:
     move $t8, $t9          # left
 
 SearchPattern_left_loop:
-    bgez $t8, SearchPattern_readarr_left # i >= left
+    bgez $t8, SearchPattern_readarr_left # j >= left
     j SearchPattern_next_direction
 
 SearchPattern_readarr_left:
@@ -172,9 +170,8 @@ SearchPattern_readarr_left:
     move $a1, $t8          # col
     move $a2, $t2          # windowx
     move $a3, $t3          # windowy
-    move $a4, $a1          # frame
+    move $a4, $t1          # frameWidth
     move $a5, $t5          # temp
-    move $a6, $t1          # frameWidth
     jal ReadArr
 
     mul $t0, $t2, $t3      # windowx * windowy
@@ -182,15 +179,15 @@ SearchPattern_readarr_left:
     move $s4, $v0          # tempSAD
 
     blt $s4, $s1, SearchPattern_update_indices_left
-    j SearchPattern_next_i_left
+    j SearchPattern_next_j_left
 
 SearchPattern_update_indices_left:
     move $s1, $s4          # lowestSAD = tempSAD
     move $s2, $t7          # lowestSADIndexI = bottom
     move $s3, $t8          # lowestSADIndexJ = i
 
-SearchPattern_next_i_left:
-    addi $t8, $t8, -1      # i--
+SearchPattern_next_j_left:
+    addi $t8, $t8, -1      # j--
     j SearchPattern_left_loop
 
 SearchPattern_up:
@@ -206,9 +203,8 @@ SearchPattern_readarr_up:
     move $a1, $t8          # col
     move $a2, $t2          # windowx
     move $a3, $t3          # windowy
-    move $a4, $a1          # frame
+    move $a4, $t1          # frameWidth
     move $a5, $t5          # temp
-    move $a6, $t1          # frameWidth
     jal ReadArr
 
     mul $t0, $t2, $t3      # windowx * windowy
@@ -228,28 +224,22 @@ SearchPattern_next_i_up:
     j SearchPattern_up_loop
 
 SearchPattern_end:
+    # Prepare for print
     move $a0, $s2          # lowestSADIndexI
     move $a1, $s3          # lowestSADIndexJ
-    li $v0, 1              # print integer syscall
+    la $a0, msg            # Load message address
+    li $v0, 1              # syscall for print integer
     syscall
-    li $v0, 1              # print integer syscall
-    syscall
-    li $v0, 10             # exit
+    li $v0, 10             # exit syscall
     syscall
 
 # Main Function
 main:
-    # Test 0
-    la $a0, asize0        # sizes
-    la $a1, frame0        # frame
-    la $a2, window0       # window
+    la $a0, asize0        # Load sizes
+    la $a1, frame0        # Load frame
+    la $a2, window0       # Load window
 
-    jal SearchPattern
+    jal SearchPattern      # Call SearchPattern
 
-    li $v0, 10            # exit
+    li $v0, 10            # exit syscall
     syscall
-
-.data
-asize0: .word 4, 4, 2, 2
-frame0: .word 0, 0, 1, 2, 0, 0, 3, 4, 0, 0, 0, 0, 0, 0, 0, 0
-window0: .word 1, 2, 3, 4
