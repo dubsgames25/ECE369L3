@@ -99,7 +99,11 @@ SearchPattern:
     addi $s0, $zero, 2147483647 # lowestSAD = INT_MAX
 
 SearchPattern_outer:
-    bne $s0, $zero, SearchPattern_loop
+    # Check if the search should continue
+    bne $s0, $zero, SearchPattern_inner_right  # Continue if lowestSAD not found yet
+
+    # When no valid lowestSAD is found, exit SearchPattern
+    jr $ra
 
 SearchPattern_inner_right:
     beq $t9, $zero, MoveRight  # if direction == 0, move right
@@ -156,14 +160,13 @@ MoveDown_next:
     addi $t5, $t5, 1          # i++
     j MoveDown_loop
 
-    addi $t8, $t8, -1         # right--
-    addi $t9, $t9, 2          # direction = 2
+    addi $t7, $t7, 1          # left++
+    addi $t9, $t9, 1          # direction = 2
     j SearchPattern_outer
 
 MoveLeft:
-    # Implement MoveLeft logic
-    add $t0, $t6, $zero      # i = bottom
-    add $t1, $t7, $zero      # j = right
+    add $t0, $t6, $zero        # i = bottom
+    add $t1, $zero, $t8      # j = right
 MoveLeft_loop:
     blt $t1, $t7, MoveLeft_next # if j < left, go to next
     jal ReadArr            # ReadArr(i, j, windowx, windowy, frame, temp, cols)
@@ -185,15 +188,14 @@ MoveLeft_next:
     j MoveLeft_loop
 
     addi $t6, $t6, -1         # bottom--
-    addi $t9, $t9, 3          # direction = 3
+    addi $t9, $t9, 1          # direction = 3
     j SearchPattern_outer
 
 MoveUp:
-    # Implement MoveUp logic
-    add $t0, $t6, $zero      # i = bottom
-    add $t1, $t7, $zero      # j = left
+    add $t0, $t7, $zero        # i = left
+    add $t1, $zero, $t5      # j = top
 MoveUp_loop:
-    bgt $t0, $t5, MoveUp_next # if i < top, go to next
+    blt $t1, $t9, MoveUp_next  # if j < top, go to next
     jal ReadArr            # ReadArr(i, j, windowx, windowy, frame, temp, cols)
     add $a0, $t0, $zero
     add $a1, $t1, $zero
@@ -209,10 +211,9 @@ MoveUp_loop:
     add $s1, $t0, $zero        # lowestSADIndexI = i
     add $s2, $t1, $zero        # lowestSADIndexJ = j
 MoveUp_next:
-    addi $t0, $t0, -1         # i--
+    addi $t1, $t1, -1         # j--
     j MoveUp_loop
 
-    addi $t7, $t7, 1          # left++
-    addi $t9, $t9, 0          # direction = 0
+    addi $t5, $t5, -1         # top--
+    addi $t9, $t9, 0          # Reset direction
     j SearchPattern_outer
-
