@@ -3,90 +3,96 @@
 #include <string.h>
 #include <limits.h>
 
-void printArray(int *array, int rows, int cols) {
-    int test[rows][cols];  // Create a 2D array called test
-
-    // Populate test array with values from the 1D pointer array (array)
-    for (int i = 0; i < rows; i++) {
-        for (int j = 0; j < cols; j++) {
-            test[i][j] = *(array + i * cols + j);  // Correct pointer arithmetic
-        }
-    }
-}
-
 int SAD(int *temp, int *window, int size) {
-    int sum = 0;
+    // Compares our temp window from the frame to the desired window.
+    // Takes in an array pointer for the window from the frame array and desired window array
+    // as well as the window size in the format of length * width.
+    // The 2d array will be read into a 1 dimensional array reading left to right top to bottom.
+    // Returns an integer where 0 indicates we found the desired window.
+    // Lower the integer the closer to the desired window we are.
+    int sum = 0, windowSum = 0;
     for (int i = 0; i < size; i++) {
-        sum += abs(temp[i] - window[i]);
+        sum += temp[i];
+        windowSum += window[i];
     }
-    return sum;
+    return abs(sum - windowSum);
 }
 
 void ReadArr(int row, int col, int windowx, int windowy, int *frame, int *temp, int frameWidth) {
-    for (int i = 0; i < windowx * windowy; i++) {
-        temp[i] = frame[(row + i / windowy) * frameWidth + (col + i % windowy)];
+    for (int i = 0; i < windowx; i++) {
+        for (int j = 0; j < windowy; j++) {
+            temp[i * windowy + j] = frame[(row + i) * frameWidth + (col + j)];
+        }
     }
 }
 
 void SearchPattern(int *sizes, int *frame, int *window) {
-    int *temp = malloc(sizes[2] * sizes[3] * sizeof(int));
-    int lowestSAD = INT_MAX, lowestSADIndexI = 0, lowestSADIndexJ = 0;
-    int top = 0, left = 0, right = sizes[1] - 1, bottom = sizes[0] - 1;
-    int direction,i,j,end,step;
+    int *temp = (int *)malloc(sizes[2] * sizes[3] * sizeof(int));
+    int top = 0, bottom = sizes[0] - 1, left = 0, right = sizes[1] - 1;
+    int direction = 0;
+    int lowestSAD = INT_MAX;
+    int lowestSADIndexI, lowestSADIndexJ;
+    int tempSAD = 0;
+    int i, j;
 
-    for (direction = 0; lowestSAD != 0; direction = (direction + 1) % 4) {
-        i = (direction == 0 || direction == 1) ? top : left;
-        j = (direction == 0 || direction == 3) ? left :  right;
-        end = (direction == 0) ? right : ( direction == 2) ? left : (direction == 1) ? bottom : top;
-        step = (direction == 2 || direction == 3) ? -1 : 1;
-
-        if (direction == 0 || direction == 2) {
-            // Traverse horizontally
-            for (; j <= end; j += step) {
+    while (lowestSAD!=0) {
+        if (direction == 0) {  // Move right
+            i = top;
+            for (j = left; j <= right; j++) {
                 ReadArr(i, j, sizes[2], sizes[3], frame, temp, sizes[1]);
-                int tempSAD = SAD(temp, window, sizes[2] * sizes[3]);
-                printf("Okay\n");
+                tempSAD = SAD(temp, window, sizes[2] * sizes[3]);
                 if (tempSAD < lowestSAD) {
                     lowestSAD = tempSAD;
                     lowestSADIndexI = i;
                     lowestSADIndexJ = j;
                 }
             }
-            if(direction == 0){
-                direction = 1;
-            }
-            else{
-                direction = 3;
-            }
-        } else {
-            // Traverse vertically
-            for (; i <= end; i += step) {
+            top++;
+            direction = 1;
+        } else if (direction == 1) {  // Move down
+            j = right - sizes[2] + 1;
+            for (i = top; i <= bottom; i++) {
                 ReadArr(i, j, sizes[2], sizes[3], frame, temp, sizes[1]);
-                int tempSAD = SAD(temp, window, sizes[2] * sizes[3]);
-                printf("Okay\n");
+                tempSAD = SAD(temp, window, sizes[2] * sizes[3]);
                 if (tempSAD < lowestSAD) {
                     lowestSAD = tempSAD;
                     lowestSADIndexI = i;
                     lowestSADIndexJ = j;
                 }
             }
-            if(direction == 1){
-                direction = 2;
+            right--;
+            direction = 2;
+        } else if (direction == 2) {  // Move left
+            for (i = right; i >= left; i--) {
+                ReadArr(bottom, i, sizes[2], sizes[3], frame, temp, sizes[1]);
+                tempSAD = SAD(temp, window, sizes[2] * sizes[3]);
+                if (tempSAD < lowestSAD) {
+                    lowestSAD = tempSAD;
+                    lowestSADIndexI = bottom;
+                    lowestSADIndexJ = i;
+                }
             }
-            else{
-                direction = 0;
+            bottom--;
+            direction = 3;
+        } else if (direction == 3) {  // Move up
+            for (i = bottom; i >= top; i--) {
+                ReadArr(i, left, sizes[2], sizes[3], frame, temp, sizes[1]);
+                tempSAD = SAD(temp, window, sizes[2] * sizes[3]);
+                if (tempSAD < lowestSAD) {
+                    lowestSAD = tempSAD;
+                    lowestSADIndexI = i;
+                    lowestSADIndexJ = left;
+                }
             }
+            left++;
+            direction = 0;
         }
-
-        if (direction == 0) top++;
-        else if (direction == 1) right--;
-        else if (direction == 2) bottom--;
-        else left++;
     }
 
     printf("%d, %d\n", lowestSADIndexI, lowestSADIndexJ);
     free(temp);
 }
+
 
 
 
