@@ -55,6 +55,9 @@ j iterate_window
 next_one:
 
 
+jal print_newline
+
+
 move $t0,$zero
 sub $t1,$s0,$s2
 addi $t1,$t1,1
@@ -71,13 +74,13 @@ li $t9,0
 j iterate_rightF
 next_one2:
 
-
+jal print_newline
 
 
 move $t0,$zero
 sub $t1,$s1,$s3
 addi $t1,$t1,1
-sub $s7, $s0,$s2
+move $s7, $s2
 
 li $t2,0
 li $t3,0
@@ -91,7 +94,7 @@ li $t9,0
 j iterate_down
 next_one3:
 
-
+jal print_newline
 
 move $t0,$zero
 sub $t1,$s1,$s3
@@ -107,7 +110,7 @@ li $t7,0
 li $t8,0
 li $t9,0
 
-j iterate_left
+#j iterate_left
 next_one4:
 
 
@@ -203,18 +206,18 @@ j next_one2
 
 
 iterate_down:
-beq $t0,$t1,leave_rightD
-la $t2,frame0#regiter
-sll $s7,$s7,2
-add $t2,$t2,$s7
-sll $t3,$t0,4# multiply t3 by 4
-add $t2,$t2,$t3#register plus offset of #t3
+beq $t0,$t1,leave_rightD#
+la $t2,frame0#grabs the address of the first index of the register
+sll $s7,$s7,2 #$s7 is 4 times 4 which makes it 16	
+add $t2,$t2,$s7# we add 16 to our address
+sll $t3,$t0,4# we get the iteration of window we need from $t0 and multiply it by 4 to give us 16, 
+add $t2,$t2,$t3#register plus offset of #t3, first iteration is still at 16 second iteration will be 16 plus 32 then 16 plus 48
 li $t4,0 #intialize #t4
 add $t4,$t4,$t2   #store rgister offset value to t4
 #if we are at the first index of the frame0 we move right to get the values of the window and the values of the frame0
 li $t6,0
 loop_F2:
-beq  $t6,$s2,exit_i2
+beq  $t6,$s2,exit_i2#  this is the window size that we need to iterate from
 lw $s4,0($t4)
 add $v0,$v0,$s4
 li $t7,1
@@ -283,15 +286,26 @@ j next_one3
 
 check_index:
 bgtz $t0,skip
-li $s7,0
-add $s7,$s7,$t7
-sub $s7,$s7,1
+li $t9,0
+add $t9,$t9,$t7
+sub $t9,$t9,1
 skip:
 jr $ra
 
 
 
 #next iteration
+
+print_newline:
+
+la $s6,newline
+move $a0,$s6
+li $v0,4
+syscall
+la $a0,asize0
+li $v0,0
+
+jr $ra
 
 print_vo1:
 #beq $v1,$v0,print_match
@@ -354,11 +368,11 @@ la $s6,match
 move $a0,$s6
 li $v0,4
 syscall
-la $s6,bracket_1
+la $s6,bracket_1jal print_newline
 move $a0,$s6
 li $v0,4
 syscall
-move $a0,$s7
+move $a0,$t9
 li $v0,1
 syscall
 la $s6,comma
