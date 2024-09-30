@@ -12,7 +12,7 @@ bracket_1: .asciiz     "["
 bracket_2: .asciiz     "]" 
 comma: .asciiz     "," 
 window: .asciiz "This is the window value"
-
+match: .asciiz "Match at "
 
 
 .text
@@ -146,6 +146,7 @@ beq  $t6,$s2,exit_i1
 lw $s4,0($t4)
 add $v0,$v0,$s4
 li $t7,1
+jal check_index
 loopj1:
 beq $t7,$s3,jend1
 #increments j by whatever framesize and getting 4 bites then adding it to t4 to offset
@@ -169,10 +170,20 @@ leave_right:
 j next_one2
 
 
+check_index:
+bgtz $t0,skip
+li $s7,0
+add $s7,$s7,$t7
+sub $s7,$s7,1
+skip:
+jr $ra
+
+
 
 #next iteration
 
 print_vo1:
+beq $v1,$v0,print_match
 move $s4,$v0
 la $s6,bracket_1
 move $a0,$s6
@@ -194,17 +205,12 @@ jr $ra
 
 
 print_voW:
-
-
 move $s4,$v0
-
+move $v1,$v0
 la $s6,window
 move $a0,$s6
 li $v0,4
 syscall
-
-
-
 la $s6,bracket_1
 move $a0,$s6
 li $v0,4
@@ -219,7 +225,6 @@ la $s6,bracket_2
 move $a0,$s6
 li $v0,4
 syscall
-
 la $s6,newline
 move $a0,$s6
 li $v0,4
@@ -229,9 +234,40 @@ li $v0,0
 jr $ra
 
 
+print_match:
+la $s6,newline
+move $a0,$s6
+li $v0,4
+syscall
+la $s6,match
+move $a0,$s6
+li $v0,4
+syscall
+la $s6,bracket_1
+move $a0,$s6
+li $v0,4
+syscall
+move $a0,$s7
+li $v0,1
+syscall
+la $s6,comma
+move $a0,$s6
+li $v0,4
+syscall
+move $a0,$t0
+li $v0,1
+syscall
+la $s6,bracket_2
+move $a0,$s6
+li $v0,4
+syscall
 
 
-jr $ra
+
+
+j program_end
+
+
 
 
 program_end:
