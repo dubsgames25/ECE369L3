@@ -110,7 +110,7 @@ li $t7,0
 li $t8,0
 li $t9,0
 
-#j iterate_left
+j iterate_left
 next_one4:
 
 
@@ -368,7 +368,7 @@ la $s6,match
 move $a0,$s6
 li $v0,4
 syscall
-la $s6,bracket_1jal print_newline
+la $s6,bracket_1
 move $a0,$s6
 li $v0,4
 syscall
