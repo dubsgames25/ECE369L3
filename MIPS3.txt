@@ -98,7 +98,7 @@ jal print_newline
 
 sub $t0,$s0,$s2
 mul $t1,$s0,$s1
-sub $s7, $s0,$s2
+#sub $s7, $s0,$s2
 
 li $t2,0
 li $t3,0
@@ -238,7 +238,7 @@ addi $t6,$t6,1
 j loop_F2
 exit_i2:
 jal print_vo1
-sub $t0,$t0,1   
+addi $t0,$t0,1   
 j iterate_down
 leave_rightD:
 j next_one3
@@ -249,7 +249,7 @@ iterate_left:
 beqz $t0,leave_left
 la $t2,frame0#regiter
 sll $t3,$t0,2# multiply t3 by 4
-sub $t2,$t2,$t3#register plus offset of #t3
+add $t2,$t2,$t3#register plus offset of #t3
 mul $t1,$t1,2
 add $t2,$t2,$t1
 li $t4,0 #intialize #t4
@@ -257,7 +257,7 @@ add $t4,$t4,$t2   #store rgister offset value to t4
 #if we are at the first index of the frame0 we move right to get the values of the window and the values of the frame0
 li $t6,0
 loop_F3:
-beq  $t6,$s2,exit_i1
+beq  $t6,$s2,exit_i3
 lw $s4,0($t4)
 add $v0,$v0,$s4
 li $t7,1
@@ -276,13 +276,13 @@ sub $t8,$t8,4
 sub $t4,$t4,$t8
 li $t8,0
 addi $t6,$t6,1
-j loop_F1
+j loop_F3
 exit_i3:
 jal print_vo1
-addi $t0,$t0,1   
+subi $t0,$t0,1   
 j iterate_left
 leave_left:
-j next_one3
+j next_one4
 
 
 check_index:
