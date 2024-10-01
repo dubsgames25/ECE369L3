@@ -1,9 +1,9 @@
 .data
 asize0:  .word    4,  4,  2, 2,   # i, j, k, l
 frame0:  .word    0,  0,  0,  0,
+         .word    1,  2,  0,  0,
+         .word    3,  4,  0,  0,
          .word    0,  0,  0,  0,
-         .word    0,  1,  2,  0,
-         .word    0,  3,  4,  0,
 window0: .word    1,  2
          .word    3,  4
          
@@ -19,9 +19,6 @@ match: .asciiz "Match at "
 
 .globl main
 
-
-
-
 main:
 
 la $a0,asize0
@@ -33,6 +30,13 @@ lw $s1,4($a0)#j
 lw $s2,8($a0)#k
 lw $s3,12($a0)#l
 
+
+
+j main1
+
+main1:
+start_again:
+beq $s0,$s2,ending_program
 
 li $t0,0
 li $t1,0
@@ -106,6 +110,9 @@ sub $a1,$s0,$s2
 j iterate_down
 next_one3:
 
+
+sub $s1,$s1,$s3
+
 jal print_newline
 
 
@@ -132,6 +139,7 @@ move $a3,$s2
 j iterate_left
 next_one4:
 
+sub $s0,$s0,$s2
 
 jal print_newline
 
@@ -155,7 +163,7 @@ sub $a1,$s0,$s2
 j iterate_up
 next_one5:
 
-
+j start_again
 
 ending_program:
 
