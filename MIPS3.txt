@@ -2,8 +2,8 @@
 asize0:  .word    4,  4,  2, 2,   # i, j, k, l
 frame0:  .word    0,  0,  0,  0,
          .word    0,  0,  0,  0,
-         .word    1,  2,  0,  0,
-         .word    3,  4,  0,  0,
+         .word    0,  1,  2,  0,
+         .word    0,  3,  4,  0,
 window0: .word    1,  2
          .word    3,  4
          
@@ -34,10 +34,8 @@ lw $s2,8($a0)#k
 lw $s3,12($a0)#l
 
 
-
-move $t0,$zero
-add $t1,$t1,$s2
-sub $t1,$t1,1
+li $t0,0
+li $t1,0
 li $t2,0
 li $t3,0
 li $t4,0
@@ -46,6 +44,12 @@ li $t6,0
 li $t7,0
 li $t8,0
 li $t9,0
+
+
+
+move $t0,$zero
+add $t1,$t1,$s2
+sub $t1,$t1,1
 #jal iterate_Window
 j iterate_window
 
@@ -58,10 +62,9 @@ next_one:
 jal print_newline
 
 
-move $t0,$zero
-sub $t1,$s0,$s2
-addi $t1,$t1,1
 
+li $t0,0
+li $t1,0
 li $t2,0
 li $t3,0
 li $t4,0
@@ -70,6 +73,10 @@ li $t6,0
 li $t7,0
 li $t8,0
 li $t9,0
+
+move $t0,$zero
+sub $t1,$s0,$s2
+addi $t1,$t1,1
 
 j iterate_rightF
 next_one2:
@@ -77,10 +84,11 @@ next_one2:
 jal print_newline
 
 
-move $t0,$zero
-sub $t1,$s1,$s3
-addi $t1,$t1,1
 
+
+
+li $t0,0
+li $t1,0
 li $t2,0
 li $t3,0
 li $t4,0
@@ -89,15 +97,23 @@ li $t6,0
 li $t7,0
 li $t8,0
 li $t9,0
+
+move $t0,$zero
+sub $t1,$s1,$s3
+addi $t1,$t1,1
+sub $a1,$s0,$s2
 
 j iterate_down
 next_one3:
 
 jal print_newline
 
-sub $t0,$s0,$s2
 
 
+
+
+li $t0,0
+li $t1,0
 li $t2,0
 li $t3,0
 li $t4,0
@@ -107,8 +123,37 @@ li $t7,0
 li $t8,0
 li $t9,0
 
+sub $t0,$s0,$s2
+move $s6,$s2
+move $a3,$s2
+
+
+
 j iterate_left
 next_one4:
+
+
+jal print_newline
+
+
+
+li $t0,0
+li $t1,0
+li $t2,0
+li $t3,0
+li $t4,0
+li $t5,0
+li $t6,0
+li $t7,0
+li $t8,0
+li $t9,0
+
+sub $t0,$s1,$s3
+sub $a1,$s0,$s2
+
+
+j iterate_up
+next_one5:
 
 
 
@@ -168,6 +213,8 @@ j next_one
 iterate_rightF:
 beq   $t0,$t1,leave_right
 la $t2,frame0#regiter
+li $a1,0
+move $a1,$t0
 sll $t3,$t0,2# multiply t3 by 4
 add $t2,$t2,$t3#register plus offset of #t3
 li $t4,0 #intialize #t4
@@ -179,7 +226,7 @@ beq  $t6,$s2,exit_i1
 lw $s4,0($t4)
 add $v0,$v0,$s4
 li $t7,1
-jal check_index
+
 loopj1:
 beq $t7,$s3,jend1
 #increments j by whatever framesize and getting 4 bites then adding it to t4 to offset
@@ -205,8 +252,11 @@ j next_one2
 
 iterate_down:
 beq $t0,$t1,leave_down#
+li $a3,0
+move $a3,$t0
 la $t2,frame0#grabs the address of the first index of the register
-mul $s7,$s7,2 #$s7 is 4 times 4 which makes it 16	
+move $s7,$s2
+mul $s7,$s7,4 #$s7 is the window width times 4 to get the offset
 add $t2,$t2,$s7# we add 16 to our address
 sll $t3,$t0,4# we get the iteration of window we need from $t0 and multiply it by 4 to give us 16, 
 add $t2,$t2,$t3#register plus offset of #t3, first iteration is still at 16 second iteration will be 16 plus 32 then 16 plus 48
@@ -219,7 +269,6 @@ beq  $t6,$s2,exit_i2#  this is the window size that we need to iterate from
 lw $s4,0($t4)
 add $v0,$v0,$s4
 li $t7,1
-jal check_index
 loopj2:
 beq $t7,$s3,jend2
 #increments j by whatever framesize and getting 4 bites then adding it to t4 to offset
@@ -246,6 +295,11 @@ j next_one3
 
 iterate_left:
 bltz $t0,leave_left
+li $t9,0
+li $a1,0
+move $a1,$t0
+move $t9,$t0
+sub $t9,$t9,1
 la $t2,frame0#regiter
 sll $t3,$t0,2# multiply t3 by 4
 add $t2,$t2,$t3#register plus offset of #t3
@@ -261,7 +315,6 @@ beq  $t6,$s2,exit_i3
 lw $s4,0($t4)
 add $v0,$v0,$s4
 li $t7,1
-jal check_index
 loopj3:
 beq $t7,$s3,jend3
 #increments j by whatever framesize and getting 4 bites then adding it to t4 to offset
@@ -285,13 +338,52 @@ leave_left:
 j next_one4
 
 
-check_index:
-bgtz $t0,skip
-li $t9,0
-add $t9,$t9,$t7
-sub $t9,$t9,1
-skip:
-jr $ra
+#move $t0,$s1#
+#sub $a1,$s0,$s2
+#mult $t1,$s0,$s1
+#a3 is the first 
+#a1 is the second one
+iterate_up:
+bltz  $t0,leave_up#
+li $a3,0
+move $a3,$t0
+la $t2,frame0#grabs the address of the first index of the register
+mul $t1,$s0,$s1
+mul $t1,$t1,$t0
+add $t2,$t2,$t1
+li $t4,0 #intialize #t4
+add $t4,$t4,$t2   #store rgister offset value to t4
+#if we are at the first index of the frame0 we move right to get the values of the window and the values of the frame0
+li $t6,0
+loop_F4:
+beq  $t6,$s2,exit_i4#  this is the window size that we need to iterate from
+lw $s4,0($t4)
+add $v0,$v0,$s4
+li $t7,1
+loopj4:
+beq $t7,$s3,jend4
+#increments j by whatever framesize and getting 4 bites then adding it to t4 to offset
+sll $t8,$s0,2
+add $t4,$t4,$t8
+lw $s4,0($t4)
+add $v0,$v0,$s4
+addi $t7,$t7,1
+j loopj4
+jend4:
+sub $t8,$t8,4
+sub $t4,$t4,$t8
+li $t8,0
+addi $t6,$t6,1
+j loop_F4
+exit_i4:
+jal print_vo1
+subi $t0,$t0,1   
+j iterate_up
+leave_up:
+j next_one5
+
+
+
 
 
 
@@ -361,6 +453,8 @@ jr $ra
 
 
 print_match:
+
+
 la $s6,newline
 move $a0,$s6
 li $v0,4
@@ -373,20 +467,23 @@ la $s6,bracket_1
 move $a0,$s6
 li $v0,4
 syscall
-move $a0,$t9
+move $a0,$a3
 li $v0,1
 syscall
 la $s6,comma
 move $a0,$s6
 li $v0,4
 syscall
-move $a0,$t0
+move $a0,$a1
 li $v0,1
 syscall
 la $s6,bracket_2
 move $a0,$s6
 li $v0,4
 syscall
+
+li $s6,0
+li $a1,0
 
 
 
