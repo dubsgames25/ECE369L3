@@ -111,7 +111,6 @@ j iterate_down
 next_one3:
 
 
-sub $s1,$s1,$s3
 
 jal print_newline
 
@@ -138,9 +137,8 @@ move $a3,$s2
 
 j iterate_left
 next_one4:
-
 sub $s0,$s0,$s2
-
+sub $s1,$s1,$s3
 jal print_newline
 
 
@@ -409,7 +407,7 @@ li $v0,0
 jr $ra
 
 print_vo1:
-#beq $v1,$v0,print_match
+beq $v1,$v0,print_match
 move $s4,$v0
 la $s6,bracket_1
 move $a0,$s6
