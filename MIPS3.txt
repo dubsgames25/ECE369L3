@@ -1,9 +1,9 @@
 .data
-asize0:  .word    4,  4,  2, 2   # i, j, k, l
-frame0:  .word    0,  0,  1,  2
-         .word    0,  0,  3,  4
-         .word    0,  0,  0,  0
-         .word    0,  0,  0,  0
+asize0:  .word    4,  4,  2, 2,   # i, j, k, l
+frame0:  .word    0,  0,  0,  0,
+         .word    0,  0,  0,  0,
+         .word    1,  2,  0,  0,
+         .word    3,  4,  0,  0,
 window0: .word    1,  2
          .word    3,  4
          
@@ -80,7 +80,6 @@ jal print_newline
 move $t0,$zero
 sub $t1,$s1,$s3
 addi $t1,$t1,1
-move $s7, $s2
 
 li $t2,0
 li $t3,0
@@ -97,8 +96,7 @@ next_one3:
 jal print_newline
 
 sub $t0,$s0,$s2
-mul $t1,$s0,$s1
-#sub $s7, $s0,$s2
+
 
 li $t2,0
 li $t3,0
@@ -111,6 +109,7 @@ li $t9,0
 
 j iterate_left
 next_one4:
+
 
 
 ending_program:
@@ -205,9 +204,9 @@ j next_one2
 
 
 iterate_down:
-beq $t0,$t1,leave_rightD#
+beq $t0,$t1,leave_down#
 la $t2,frame0#grabs the address of the first index of the register
-sll $s7,$s7,2 #$s7 is 4 times 4 which makes it 16	
+mul $s7,$s7,2 #$s7 is 4 times 4 which makes it 16	
 add $t2,$t2,$s7# we add 16 to our address
 sll $t3,$t0,4# we get the iteration of window we need from $t0 and multiply it by 4 to give us 16, 
 add $t2,$t2,$t3#register plus offset of #t3, first iteration is still at 16 second iteration will be 16 plus 32 then 16 plus 48
@@ -240,16 +239,17 @@ exit_i2:
 jal print_vo1
 addi $t0,$t0,1   
 j iterate_down
-leave_rightD:
+leave_down:
 j next_one3
 
 
 
 iterate_left:
-beqz $t0,leave_left
+bltz $t0,leave_left
 la $t2,frame0#regiter
 sll $t3,$t0,2# multiply t3 by 4
 add $t2,$t2,$t3#register plus offset of #t3
+mul $t1,$s0,$s1
 mul $t1,$t1,2
 add $t2,$t2,$t1
 li $t4,0 #intialize #t4
