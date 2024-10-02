@@ -492,6 +492,16 @@ newline: .asciiz     "\n"
 main: 
     addi    $sp, $sp, -4    # Make space on stack
     sw      $ra, 0($sp)     # Save return address
+
+    # Start test 0 
+    ############################################################
+    la      $a0, asize0     # 1st parameter: address of asize0[0]
+    la      $a1, frame0     # 2nd parameter: address of frame0[0]
+    la      $a2, window0    # 3rd parameter: address of window0[0] 
+   
+    jal     vbsme           # call function
+    jal     print_result    # print results to console
+
          
     # Start test 1 
     ############################################################
@@ -780,429 +790,364 @@ vbsme:
     li      $v1, 0
 
     # insert your code here
+   
 
-# SearchPattern ################################################################################################################    
-.text
-.globl SearchPattern
+# Save the $ra value so we know when to jump back to main
+addi $sp, $sp -4
+sw $ra, 0($sp)
 
-SearchPattern:
-    # Allocate stack space and save registers
-    addi $sp, $sp, -80  # Increased stack space
-    sw $ra, 76($sp)
-    sw $s0, 72($sp)
-    sw $s1, 68($sp)
-    sw $s2, 64($sp)
-    sw $s3, 60($sp)
-    sw $s4, 56($sp)
-    sw $s5, 52($sp)
-    sw $s6, 48($sp)
-    sw $s7, 44($sp)
 
-    # Load function arguments
-    move $s0, $a0  # sizes array pointer
-    move $s1, $a1  # frame array pointer
-    move $s2, $a2  # window array pointer
 
-    # Load sizes
-    lw $t0, 0($s0)   # rows = sizes[0];
-    lw $t1, 4($s0)   # cols = sizes[1];
-    lw $t2, 8($s0)   # windowx = sizes[2];
-    lw $t3, 12($s0)  # windowy = sizes[3];
+#####################################################################
+### Search Pattern
+#####################################################################
 
-    # Store sizes on stack for later use
-    sw $t0, 40($sp)  # rows
-    sw $t1, 36($sp)  # cols
-    sw $t2, 32($sp)  # windowx
-    sw $t3, 28($sp)  # windowy
+# Load array sizes
+lw $s0, 0($a0)  # frame height (i) ROWS
+lw $s1, 4($a0)  # frame width (j) COLS
+lw $s2, 8($a0)  # window height (k) WindowX
+lw $s3, 12($a0) # window width (l) WindowY
 
-    # Allocate memory for temp array
-    mul $t4, $t2, $t3
-    sll $t4, $t4, 2  # Multiply by 4 for int size
-    move $a0, $t4
-    li $v0, 9        # syscall for memory allocation
-    syscall
-    move $s3, $v0    # temp array pointer
+# Initialize SAD variables
+li $s4, 0x7FFFFFFF     # minsad (initialize to -1 for first comparison)
+li $s5, 0       # bestx
+li $s6, 0       # besty
+li $t8, 0	# windowSAD
+li $t9, 0 	# tempSAD
+li $s7, 0 	# free variable
 
-    # Initialize variables
-    li $t4, 0        # int top = 0;
-    addi $t5, $t0, -1  # int bottom = rows - 1;
-    li $t6, 0        # int left = 0;
-    addi $t7, $t1, -1  # int right = cols - 1;
-    li $s4, 0        # int direction = 0;
-    li $s5, 2147483647  # int lowestSAD = INT_MAX;
-    li $s6, 0        # int lowestSADIndexI = 0;
-    li $s7, 0        # int lowestSADIndexJ = 0;
+#Find the SAD of the window
+	
+li $t0, 0	# index i
 
-    # Store these on stack
-    sw $t4, 24($sp)  # top
-    sw $t5, 20($sp)  # bottom
-    sw $t6, 16($sp)  # left
-    sw $t7, 12($sp)  # right
+WindowLoopOuter:		
+	bge $t0, $s2, OuterEnd
 
-    # Main loop
-main_loop:
-    # while (top <= bottom && left <= right) {
-    lw $t4, 24($sp)  # Load top
-    lw $t5, 20($sp)  # Load bottom
-    lw $t6, 16($sp)  # Load left
-    lw $t7, 12($sp)  # Load right
-    bgt $t4, $t5, end_main_loop  # if (top > bottom) exit loop
-    bgt $t6, $t7, end_main_loop  # if (left > right) exit loop
+	li $t1, 0	# index j
+WindowLoopInner:
+	bge $t1, $s3, InnerEnd		#(j<width)
+	
+	mul $t2, $t0, $s3	# t1 = rowIndex * colSize
+	add $t2, $t2, $t1	# + colIndex
+	sll $t2, $t2, 2 	# * dataSize
 
-    beq $s4, 0, move_right
-    beq $s4, 1, move_down
-    beq $s4, 2, move_left
-    beq $s4, 3, move_up
+	add $t2, $t2, $a2	# + baseAddr for window
 
-move_right:
-    # if (direction == 0) {  // Move right
-    lw $t4, 24($sp)  # Load top
-    lw $t6, 16($sp)  # Load left
-    lw $t7, 12($sp)  # Load right
-    move $t8, $t4    # i = top;
-    move $t9, $t6    # j = left;
-move_right_loop:
-    bgt $t9, $t7, end_move_right  # if (j > right) exit loop
-    
-    # ReadArr(i, j, windowx, windowy, frame, temp, cols);
-    move $a0, $t8
-    move $a1, $t9
-    lw $a2, 32($sp)  # windowx
-    lw $a3, 28($sp)  # windowy
-    sw $s1, 8($sp)   # frame
-    sw $s3, 4($sp)   # temp
-    lw $t0, 36($sp)  # cols
-    sw $t0, 0($sp)
-    jal ReadArr
+	lw $t4, ($t2)	
+	add $t8, $t8, $t4	# windowSum = windowSum + array[i][j]
+	addi $t1, $t1, 1	# i++
+	j WindowLoopInner
+InnerEnd:
+	addi $t0, $t0, 1
+	j WindowLoopOuter
+OuterEnd:
 
-    # tempSAD = SAD(temp, window, windowx * windowy);
-    move $a0, $s3
-    move $a1, $s2
-    lw $t0, 32($sp)  # windowx
-    lw $t1, 28($sp)  # windowy
-    mul $a2, $t0, $t1
-    jal SAD
-    move $t0, $v0    # tempSAD = SAD(...)
+# Initialize spiral search
+li $t0, 0       	# top
+addi $t1, $s0, -1       # bottom
+li $t2, 0       	# left
+addi $t3, $s1, -1       # right
+li $t4, 0       # direction
+li $t6, 0       # i
+li $t7, 0       # j
 
-    # if (tempSAD < lowestSAD) {
-    #     lowestSAD = tempSAD;
-    #     lowestSADIndexI = i;
-    #     lowestSADIndexJ = j;
-    # }
-    bge $t0, $s5, skip_update_right
-    move $s5, $t0
-    move $s6, $t8
-    move $s7, $t9
-skip_update_right:
-    addi $t9, $t9, 1  # j++
-    j move_right_loop
+# Spiral Search Start ##################################################################
 
-end_move_right:
-    lw $t4, 24($sp)  # Load top
-    addi $t4, $t4, 1  # top++;
-    sw $t4, 24($sp)  # Store updated top
-    li $s4, 1         # direction = 1;
-    j main_loop
+BigLoop:
+	beq $s4, $zero, BigLoopEnd		# (while (lowestSAD!=0))
+	beq $t4, $zero, RightLoopStart		# if direction == 0
+	addi $t4, $t4, -1
+	beq $t4, $zero, DownLoopStart		# if direction == 1
+	addi $t4, $t4, -1
+	beq $t4, $zero, LeftLoopStart		# if direction == 2
+	j UpLoopStart				# if direction == 3
 
-move_down:
-    # } else if (direction == 1) {  // Move down
-    lw $t4, 24($sp)  # Load top
-    lw $t5, 20($sp)  # Load bottom
-    lw $t7, 12($sp)  # Load right
-    lw $t0, 32($sp)  # Load windowx
-    sub $t9, $t7, $t0
-    addi $t9, $t9, 1  # j = right - windowx + 1;
-    move $t8, $t4     # i = top;
-move_down_loop:
-    bgt $t8, $t5, end_move_down  # if (i > bottom) exit loop
-    
-    # ReadArr(i, j, windowx, windowy, frame, temp, cols);
-    move $a0, $t8
-    move $a1, $t9
-    lw $a2, 32($sp)  # windowx
-    lw $a3, 28($sp)  # windowy
-    sw $s1, 8($sp)   # frame
-    sw $s3, 4($sp)   # temp
-    lw $t0, 36($sp)  # cols
-    sw $t0, 0($sp)
-    jal ReadArr
+########################################################################################################### MoveRight
 
-    # tempSAD = SAD(temp, window, windowx * windowy);
-    move $a0, $s3
-    move $a1, $s2
-    lw $t0, 32($sp)  # windowx
-    lw $t1, 28($sp)  # windowy
-    mul $a2, $t0, $t1
-    jal SAD
-    move $t0, $v0    # tempSAD = SAD(...)
+	
+RightLoopStart:
+	move $t6, $t0 	# i = top
+	move $t7, $t2	# j = left
+RightLoop:
+	li $t9, 0
+	slt $t5, $t3, $t7, 	# $t5 is 1 if right < j, otherwise its 0
+	bne $t5, $zero, RightLoopEnd	
 
-    # if (tempSAD < lowestSAD) {
-    #     lowestSAD = tempSAD;
-    #     lowestSADIndexI = i;
-    #     lowestSADIndexJ = j;
-    # }
-    bge $t0, $s5, skip_update_down
-    move $s5, $t0
-    move $s6, $t8
-    move $s7, $t9
-skip_update_down:
-    addi $t8, $t8, 1  # i++
-    j move_down_loop
+	jal Read
 
-end_move_down:
-    lw $t7, 12($sp)  # Load right
-    addi $t7, $t7, -1  # right--;
-    sw $t7, 12($sp)  # Store updated right
-    li $s4, 2         # direction = 2;
-    j main_loop
+	jal SAD
+	
+	
+	slt $s7, $t9, $zero	# if(tempSad < 0)
+	bne $s7, $zero, NotRight
 
-move_left:
-    # } else if (direction == 2) {  // Move left
-    lw $t5, 20($sp)  # Load bottom
-    lw $t6, 16($sp)  # Load left
-    lw $t7, 12($sp)  # Load right
-    move $t8, $t5    # i = bottom;
-    move $t9, $t7    # j = right;
-move_left_loop:
-    blt $t9, $t6, end_move_left  # if (j < left) exit loop
-    
-    # ReadArr(i, j, windowx, windowy, frame, temp, cols);
-    move $a0, $t8
-    move $a1, $t9
-    lw $a2, 32($sp)  # windowx
-    lw $a3, 28($sp)  # windowy
-    sw $s1, 8($sp)   # frame
-    sw $s3, 4($sp)   # temp
-    lw $t0, 36($sp)  # cols
-    sw $t0, 0($sp)
-    jal ReadArr
+	slt $s7, $t9, $s4	# if(tempSad < lowestSad)
+	beq $s7, $zero, NotRight
 
-    # tempSAD = SAD(temp, window, windowx * windowy);
-    move $a0, $s3
-    move $a1, $s2
-    lw $t0, 32($sp)  # windowx
-    lw $t1, 28($sp)  # windowy
-    mul $a2, $t0, $t1
-    jal SAD
-    move $t0, $v0    # tempSAD = SAD(...)
+	move $s4, $t9
+	move $s5, $t6
+	move $s6, $t7
+NotRight:
+	addi $t7, $t7, 1	#increment loop j++
+	
+	j RightLoop
 
-    # if (tempSAD < lowestSAD) {
-    #     lowestSAD = tempSAD;
-    #     lowestSADIndexI = i;
-    #     lowestSADIndexJ = j;
-    # }
-    bge $t0, $s5, skip_update_left
-    move $s5, $t0
-    move $s6, $t8
-    move $s7, $t9
-skip_update_left:
-    addi $t9, $t9, -1  # j--
-    j move_left_loop
+RightLoopEnd:
+	addi $t0, $t0, 1	#top++
+	li $t4, 1
+	j BigLoop
 
-end_move_left:
-    lw $t5, 20($sp)  # Load bottom
-    addi $t5, $t5, -1  # bottom--;
-    sw $t5, 20($sp)  # Store updated bottom
-    li $s4, 3         # direction = 3;
-    j main_loop
+########################################################################################################### MoveDown
 
-move_up:
-    # } else if (direction == 3) {  // Move up
-    lw $t4, 24($sp)  # Load top
-    lw $t5, 20($sp)  # Load bottom
-    lw $t6, 16($sp)  # Load left
-    move $t8, $t5    # i = bottom;
-    move $t9, $t6    # j = left;
-move_up_loop:
-    blt $t8, $t4, end_move_up  # if (i < top) exit loop
-    
-    # ReadArr(i, j, windowx, windowy, frame, temp, cols);
-    move $a0, $t8
-    move $a1, $t9
-    lw $a2, 32($sp)  # windowx
-    lw $a3, 28($sp)  # windowy
-    sw $s1, 8($sp)   # frame
-    sw $s3, 4($sp)   # temp
-    lw $t0, 36($sp)  # cols
-    sw $t0, 0($sp)
-    jal ReadArr
+	
+DownLoopStart:
+	move $t6, $t0 	# i = top
+	move $t7, $t3	# j = right
+	sub $t7, $t7, $s2	# j - windowX
+	addi $t7, $t7, 1	# j + 1
+DownLoop:
+	li $t9, 0
+	slt $t5, $t1, $t6, 	# $t5 is 1 i f bottom < i, otherwise 0
+	bne $t5, $zero, DownLoopEnd	
 
-    # tempSAD = SAD(temp, window, windowx * windowy);
-    move $a0, $s3
-    move $a1, $s2
-    lw $t0, 32($sp)  # windowx
-    lw $t1, 28($sp)  # windowy
-    mul $a2, $t0, $t1
-    jal SAD
-    move $t0, $v0    # tempSAD = SAD(...)
+#################################
+	jal Read		#
+				#
+	jal SAD			#
+#################################
+	
+	slt $s7, $t9, $zero	# if(tempSad < 0)
+	bne $s7, $zero, NotRight
 
-    # if (tempSAD < lowestSAD) {
-    #     lowestSAD = tempSAD;
-    #     lowestSADIndexI = i;
-    #     lowestSADIndexJ = j;
-    # }
-    bge $t0, $s5, skip_update_up
-    move $s5, $t0
-    move $s6, $t8
-    move $s7, $t9
-skip_update_up:
-    addi $t8, $t8, -1  # i--
-    j move_up_loop
+	slt $s7, $t9, $s4	# if(tempSad < lowestSad)
+	beq $s7, $zero, NotDown
+	move $s4, $t9
+	move $s5, $t6
+	move $s6, $t7
+NotDown:
+	addi $t6 $t6, 1	#increment loop i++
+	
+	j DownLoop
 
-end_move_up:
-    lw $t6, 16($sp)  # Load left
-    addi $t6, $t6, 1  # left++;
-    sw $t6, 16($sp)  # Store updated left
-    li $s4, 0         # direction = 0;
-    j main_loop
+DownLoopEnd:
+	addi $t3, $t3, -1	# right--
+	li $t4, 2
+	j BigLoop
 
-end_main_loop:
-    # printf("%d, %d\n", lowestSADIndexI, lowestSADIndexJ);
-    li $v0, 1
-    move $a0, $s6
-    syscall
-    li $v0, 4
-    la $a0, comma_space
-    syscall
-    li $v0, 1
-    move $a0, $s7
-    syscall
-    li $v0, 4
-    la $a0, newline
-    syscall
+########################################################################################################### MoveLeft
 
-    # free(temp);
-    move $a0, $s3
-    li $v0, 9    # syscall for memory deallocation
-    syscall
+	
+LeftLoopStart:
+	move $t6, $t1 	# i = bottom
+	move $t7, $t3	# j = right
+LeftLoop:
+	li $t9, 0
+	slt $t5, $t7, $t2, 	# $t5 is 1 if j < left, otherwise 0
+	bne $t5, $zero, LeftLoopEnd	
 
-    # Restore registers and return
-    lw $s7, 44($sp)
-    lw $s6, 48($sp)
-    lw $s5, 52($sp)
-    lw $s4, 56($sp)
-    lw $s3, 60($sp)
-    lw $s2, 64($sp)
-    lw $s1, 68($sp)
-    lw $s0, 72($sp)
-    lw $ra, 76($sp)
-    addi $sp, $sp, 80
-    jr $ra
+#################################
+	jal Read		#
+				#
+	jal SAD			#
+#################################
+		
+	slt $s7, $t9, $zero	# if(tempSad < 0)
+	bne $s7, $zero, NotRight
 
-# SAD (Sum of Absolute Differences) function ############################################################################################
-.text
-.globl SAD
-SAD:
-    # Allocate stack space and save registers
-    addi $sp, $sp, -32
-    sw $ra, 28($sp)
-    sw $t0, 24($sp)
-    sw $t1, 20($sp)
-    sw $t2, 16($sp)
-    sw $t3, 12($sp)
-    sw $t4, 8($sp)
-    sw $t5, 4($sp)
-    sw $t6, 0($sp)
 
-    # Load function arguments
-    move $t0, $a0  # temp array pointer
-    move $t1, $a1  # window array pointer
-    move $t2, $a2  # size
 
-    # Initialize sum and windowSum
-    move $t3, $zero  # sum
-    move $t4, $zero  # windowSum
+	slt $s7, $t9, $s4	# if(tempSad < lowestSad)
+	beq $s7, $zero, NotLeft
+	move $s4, $t9
+	move $s5, $t6
+	move $s6, $t7
+NotLeft:
+	addi $t7, $t7, -1	#increment loop j--
+	
+	j LeftLoop
 
-    # Loop through the arrays and calculate the sums
-loop:
-    beq $t2, $zero, end_loop
-    lw $t5, ($t0)
-    lw $t6, ($t1)
-    add $t3, $t3, $t5
-    add $t4, $t4, $t6
-    addi $t0, $t0, 4
-    addi $t1, $t1, 4
-    addi $t2, $t2, -1
-    j loop
+LeftLoopEnd:
+	addi $t1, $t1, -1	#bottom --
+	li $t4, 3
+	j BigLoop
 
-end_loop:
-    # Calculate the absolute difference
-    sub $t5, $t3, $t4
-    abs $v0, $t5
+########################################################################################################### MoveUp
 
-    # Restore registers and return
-    lw $t6, 0($sp)
-    lw $t5, 4($sp)
-    lw $t4, 8($sp)
-    lw $t3, 12($sp)
-    lw $t2, 16($sp)
-    lw $t1, 20($sp)
-    lw $t0, 24($sp)
-    lw $ra, 28($sp)
-    addi $sp, $sp, 32
-    jr $ra
+	
+UpLoopStart:
+	move $t6, $t1 	# i = bottom
+	move $t7, $t2	# j = left
+UpLoop:
+	li $t9, 0
+	slt $t5, $t6, $t0, 	# $t5 is 1 if i < top, otherwise 0
+	bne $t5, $zero, UpLoopEnd	# (branch if top > i)
 
-# ReadArr function ################################################################################
-.text
-.globl ReadArr
-ReadArr:
-    # Allocate stack space and save registers
-    addi $sp, $sp, -36
-    sw $ra, 32($sp)
-    sw $t0, 28($sp)
-    sw $t1, 24($sp)
-    sw $t2, 20($sp)
-    sw $t3, 16($sp)
-    sw $t4, 12($sp)
-    sw $t5, 8($sp)
-    sw $t6, 4($sp)
-    sw $t7, 0($sp)
+#################################
+	jal Read		#
+				#
+	jal SAD			#
+#################################
+		
+	slt $s7, $t9, $zero	# if(tempSad < 0)
+	bne $s7, $zero, NotRight
 
-    # Load function arguments
-    move $t0, $a0  # row
-    move $t1, $a1  # col
-    move $t2, $a2  # windowx
-    move $t3, $a3  # windowy
-    move $t4, $a0  # frame array pointer
-    move $t5, $a1  # temp array pointer
-    lw $t6, 40($sp)  # frameWidth
 
-    # Loop through the window and copy values to the temp array
-    move $t7, $zero  # i
-    move $t0, $zero  # j
-outer_loop:
-    beq $t7, $t2, end_outer_loop
-    move $t0, $zero
-inner_loop:
-    beq $t0, $t3, end_inner_loop
-    # Calculate the index in the frame array
-    mul $t1, $a0, $t6
-    add $t1, $t1, $a1
-    add $t1, $t1, $t0
-    # Calculate the index in the temp array
-    mul $t2, $t7, $t3
-    add $t2, $t2, $t0
-    # Copy the value from the frame array to the temp array
-    lw $t4, ($t1)
-    sw $t4, ($t2)
-    addi $t0, $t0, 1
-    j inner_loop
-end_inner_loop:
-    addi $a1, $a1, 1
-    addi $t7, $t7, 1
-    j outer_loop
-end_outer_loop:
 
-    # Restore registers and return
-    lw $t7, 0($sp)
-    lw $t6, 4($sp)
-    lw $t5, 8($sp)
-    lw $t4, 12($sp)
-    lw $t3, 16($sp)
-    lw $t2, 20($sp)
-    lw $t1, 24($sp)
-    lw $t0, 28($sp)
-    lw $ra, 32($sp)
-    addi $sp, $sp, 36
-    jr $ra
+	slt $s7, $t9, $s4	# if(tempSad < lowestSad)
+	beq $s7, $zero, NotUp
+	move $s4, $t9
+	move $s5, $t6
+	move $s6, $t7
+NotUp:
+	addi $t6, $t6, -1	#increment loop i--
+	
+	j UpLoop
 
+UpLoopEnd:
+	addi $t2, $t2, 1	# Left++
+
+	li $t4, 0
+	j BigLoop
+
+BigLoopEnd:
+
+add $v0, $v0, $s5
+add $v1, $v1, $s6
+
+# Deallocate Stack Space
+lw $ra, 0($sp)
+addi $sp, $sp, 4
+
+jr $ra  # Return from subroutine
+
+
+
+
+
+
+	
+#####################################################################
+### Read using Row Major (Safe to use $t1-$t5)
+#####################################################################
+### changing the given window array. 
+### Register Values:
+### t0 top
+### t1 bottom
+### t2 left
+### t3 right
+### t4 direction
+### t6 i
+### t7 j
+#####################################################################
+
+Read:
+
+	addi $sp, $sp, -20 	# allocate 4 more spaces on the stack before Read function call
+	sw $t1, 0($sp)
+	sw $t2, 4($sp)
+	sw $t3, 8($sp)
+	sw $t4, 12($sp)
+	sw $t5, 16($sp)
+
+	li $t1, 0	# index i
+	li $t2, 0	# index j
+
+ReadLoopOuter:		
+	bge $t1, $s2, ReadOutEnd
+
+	li $t2, 0	# index j
+ReadLoopInner:
+	bge $t2, $s3, ReadInEnd		#(j<width)
+	
+	#Calculate temp index: 
+		
+	mul $t3, $t1, $s3	# t1 = rowIndex * colSize
+	add $t3, $t3, $t2	# + colIndex
+	sll $t3, $t3, 2 	# * dataSize
+
+	add $t3, $t3, $a2	# + baseAddr for temp
+
+	# Calcilate frame index (row + i)*framewidth + (col+j)
+
+	add $t4, $t1, $t6	# row + i
+	mul $t4, $t4, $s1 	# *framewidth
+	add $t4, $t4, $t7	# +col
+	add $t4, $t4, $t2	# + j
+
+	sll $t4, $t4, 2
+	add $t4, $t4, $a1	# + frame base address 
+	
+	#preform assignment
+
+	lw $t5, 0($t4)		# load from frame
+	sw $t5, 0($t3)		# store to temp
+		
+	addi $t2, $t2, 1	# j++
+	j ReadLoopInner
+
+ReadInEnd:
+	addi $t1, $t1, 1	# i++
+	j ReadLoopOuter
+
+ReadOutEnd:
+
+	lw $t1, 0($sp)
+	lw $t2, 4($sp)
+	lw $t3, 8($sp)
+	lw $t4, 12($sp)
+	lw $t5, 16($sp)
+	addi $sp, $sp, 20
+	jr $ra
+
+#####################################################################
+### SAD using Row Major (Safe to use $t0-$t3) and ($t9 is tempSAD)
+#####################################################################
+
+#Using Row-Major to access a 2d array formula is addr = baseAddr + (rowIndex * colSize + colIndex)*dataSize
+
+SAD:	
+
+	addi $sp, $sp, -20 	# allocate 5 more spaces on the stack before SAD function call
+	sw $t0, 0($sp)
+	sw $t1, 4($sp)
+	sw $t2, 8($sp)
+	sw $t3, 12($sp)
+	sw $t4, 16($sp)
+
+
+	li $t0, 0	# index i
+	li $t1, 0	# index j
+
+TempLoopOuter:		
+	bge $t0, $s2, tOuterEnd
+
+	li $t1, 0	# index j
+TempLoopInner:
+	bge $t1, $s3, tInnerEnd		#(j<width)
+		
+	mul $t2, $t0, $s3	# t1 = rowIndex * colSize
+	add $t2, $t2, $t1	# + colIndex
+	sll $t2, $t2, 2 	# * dataSize
+
+	add $t2, $t2, $a2	# + baseAddr for temp
+
+	lw $t3, ($t2)	
+	add $t9, $t9, $t3	# tempSAD = tempSAD + array[i][j]
+	addi $t1, $t1, 1	# j++
+	j TempLoopInner
+tInnerEnd:
+	addi $t0, $t0, 1	# i++
+	j TempLoopOuter
+tOuterEnd:
+	
+	sub $t9, $t9, $t8
+	
+
+	lw $t0, 0($sp)
+	lw $t1, 4($sp)
+	lw $t2, 8($sp)
+	lw $t3, 12($sp)
+	lw $t4, 16($sp)
+	addi $sp, $sp, 20
+
+	jr $ra
