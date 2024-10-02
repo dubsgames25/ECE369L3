@@ -155,7 +155,8 @@ j iterate_up
 next_one5:
 
 jal print_newline
-
+add $t3,$t3,$s3
+add $t9,$t9,$s2
 
 j start_again
 
