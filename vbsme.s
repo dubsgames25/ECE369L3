@@ -1,7 +1,7 @@
 #  Fall 2024
 #  Team Members:    
-#  % Effort    :   
-#
+# Students: Brian Flores, Joseph Wallace, Jose Elizarraras
+# Overall percent effort: 33%,33%,33%
 # ECE369A,  
 # 
 
