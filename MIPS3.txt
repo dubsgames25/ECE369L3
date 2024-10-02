@@ -1,9 +1,9 @@
 .data
 asize0:  .word    4,  4,  2, 2,   # i, j, k, l
 frame0:  .word    0,  0,  0,  0,
+         .word    0,  0,  0,  0,
          .word    1,  2,  0,  0,
          .word    3,  4,  0,  0,
-         .word    0,  0,  0,  0,
 window0: .word    1,  2
          .word    3,  4
          
@@ -39,8 +39,6 @@ main1:
 la $a1,frame0
 la $t5,($a1)
 
-start_again:
-beq $s0,$s2,ending_program
 
 li $t0,0
 li $t1,0
@@ -54,16 +52,17 @@ li $t9,0
 
 
 
-move $t0,$zero
-move $t1,$s2
+move $t1,$zero
+move $t0,$s2
 
 #jal iterate_Window
 j iterate_window
-
-
-
-
 next_one:
+
+start_again:
+beq $s0,$s2,ending_program
+
+
 
 
 jal print_newline
@@ -135,11 +134,11 @@ sub $t0,$s0,$s2
 
 j iterate_left
 next_one4:
-sub $s0,$s0,$s2
-sub $s1,$s1,$s3
+
 jal print_newline
 
-
+sub $s0,$s0,$s2
+sub $s1,$s1,$s3
 
 li $t0,0
 li $t1,0
@@ -158,6 +157,9 @@ sub $t0,$s1,$s3
 
 j iterate_up
 next_one5:
+
+jal print_newline
+
 
 j start_again
 
@@ -251,7 +253,7 @@ j next_one2
 #sub $t1,$s1,$s3
 
 iterate_down:
-bgt $t0,$t1,leave_down
+bgt $t1,$t0,leave_down
 li $t4,0 #intialize #t4
 add $t4,$t4,$a0  #store rgister offset value to t4
 li $t6,0
@@ -443,14 +445,14 @@ la $s6,bracket_1
 move $a0,$s6
 li $v0,4
 syscall
-move $a0,$a3
+move $a0,$t1
 li $v0,1
 syscall
 la $s6,comma
 move $a0,$s6
 li $v0,4
 syscall
-move $a0,$a1
+move $a0,$t0
 li $v0,1
 syscall
 la $s6,bracket_2
