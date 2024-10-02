@@ -1,7 +1,7 @@
 #  Fall 2024
 #  Team Members:    
-# Students: Brian Flores, Joseph Wallace, Jose Elizarraras
-# Overall percent effort: 33%,33%,33%
+#  % Effort    :   
+#
 # ECE369A,  
 # 
 
@@ -779,9 +779,6 @@ vbsme:
     li      $v0, 0              # reset $v0 and $V1
     li      $v1, 0
 
-    # insert your code here
-   
-
 # Save the $ra value so we know when to jump back to main
 addi $sp, $sp -4
 sw $ra, 0($sp)
@@ -907,7 +904,7 @@ DownLoop:
 #################################
 	
 	slt $s7, $t9, $zero	# if(tempSad < 0)
-	bne $s7, $zero, NotRight
+	bne $s7, $zero, NotDown
 
 	slt $s7, $t9, $s4	# if(tempSad < lowestSad)
 	beq $s7, $zero, NotDown
@@ -946,7 +943,7 @@ LeftLoop:
 #################################
 		
 	slt $s7, $t9, $zero	# if(tempSad < 0)
-	bne $s7, $zero, NotRight
+	bne $s7, $zero, NotLeft
 
 
 
@@ -970,8 +967,9 @@ LeftLoopEnd:
 	
 UpLoopStart:
 	move $t6, $t1 	# i = bottom
-	sub $t6, $t6, $s3 	# i - windowY
 	addi $t6, $t6, 1
+	sub $t6, $t6, $s3 	# i - windowY
+	
 	move $t7, $t2	# j = left
 UpLoop:
 	li $t9, 0
@@ -985,7 +983,7 @@ UpLoop:
 #################################
 		
 	slt $s7, $t9, $zero	# if(tempSad < 0)
-	bne $s7, $zero, NotRight
+	bne $s7, $zero, NotUp
 
 
 
@@ -1147,3 +1145,4 @@ tOuterEnd:
 	addi $sp, $sp, 20
 
 	jr $ra
+   
