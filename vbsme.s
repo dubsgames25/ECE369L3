@@ -1,7 +1,7 @@
 #  Fall 2024
 #  Team Members:    
-#  % Effort    :   
-#
+# Students: Brian Flores, Joseph Wallace, Jose Elizarraras
+# Overall percent effort: 33%,33%,33%
 # ECE369A,  
 # 
 
@@ -493,7 +493,8 @@ main:
     addi    $sp, $sp, -4    # Make space on stack
     sw      $ra, 0($sp)     # Save return address
          
-    # Start test 1 
+    
+# Start test 1 
     ############################################################
     la      $a0, asize1     # 1st parameter: address of asize1[0]
     la      $a1, frame1     # 2nd parameter: address of frame1[0]
@@ -658,8 +659,8 @@ main:
 
     jal     vbsme           # call function
     jal     print_result    # print results to console
-    ############################################################
-    # End of test 14     
+   
+   
    
     lw      $ra, 0($sp)         # Restore return address
     addi    $sp, $sp, 4         # Restore stack pointer
@@ -778,6 +779,8 @@ print_result:
 vbsme:  
     li      $v0, 0              # reset $v0 and $V1
     li      $v1, 0
+
+    # insert your code here
 
 # Save the $ra value so we know when to jump back to main
 addi $sp, $sp -4
@@ -926,11 +929,13 @@ DownLoopEnd:
 	
 LeftLoopStart:
 	move $t6, $t1 	# i = bottom
-	sub $t6, $t6, $s3 	# i - windowY
 	addi $t6, $t6, 1
+	sub $t6, $t6, $s2 	# i - windowY
+
 	move $t7, $t3	# j = right
-	sub $t7, $t7, $s2	# j - WindowX
 	addi $t7, $t7, 1
+	sub $t7, $t7, $s3	# j - WindowX
+	
 LeftLoop:
 	li $t9, 0
 	slt $t5, $t7, $t2, 	# $t5 is 1 if j < left, otherwise 0
@@ -968,7 +973,7 @@ LeftLoopEnd:
 UpLoopStart:
 	move $t6, $t1 	# i = bottom
 	addi $t6, $t6, 1
-	sub $t6, $t6, $s3 	# i - windowY
+	sub $t6, $t6, $s2 	# i - windowY
 	
 	move $t7, $t2	# j = left
 UpLoop:
