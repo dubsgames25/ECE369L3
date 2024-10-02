@@ -492,15 +492,25 @@ newline: .asciiz     "\n"
 main: 
     addi    $sp, $sp, -4    # Make space on stack
     sw      $ra, 0($sp)     # Save return address
+
+    # Start test 0 
+    ############################################################
+    #la      $a0, asize0     # 1st parameter: address of asize0[0]
+    #la      $a1, frame0     # 2nd parameter: address of frame0[0]
+    #la      $a2, window0    # 3rd parameter: address of window0[0] 
+   
+    #jal     vbsme           # call function
+    #jal     print_result    # print results to console
+
          
     # Start test 1 
     ############################################################
-    la      $a0, asize1     # 1st parameter: address of asize1[0]
-    la      $a1, frame1     # 2nd parameter: address of frame1[0]
-    la      $a2, window1    # 3rd parameter: address of window1[0] 
+    #la      $a0, asize1     # 1st parameter: address of asize1[0]
+    #la      $a1, frame1     # 2nd parameter: address of frame1[0]
+    #la      $a2, window1    # 3rd parameter: address of window1[0] 
    
-    jal     vbsme           # call function
-    jal     print_result    # print results to console
+    #jal     vbsme           # call function
+    #jal     print_result    # print results to console
     
     ############################################################
     # End of test 1   
@@ -508,12 +518,12 @@ main:
    
     # Start test 2 
     ############################################################
-    la      $a0, asize2     # 1st parameter: address of asize2[0]
-    la      $a1, frame2     # 2nd parameter: address of frame2[0]
-    la      $a2, window2    # 3rd parameter: address of window2[0] 
+    #la      $a0, asize2     # 1st parameter: address of asize2[0]
+    #la      $a1, frame2     # 2nd parameter: address of frame2[0]
+    #la      $a2, window2    # 3rd parameter: address of window2[0] 
    
-    jal     vbsme           # call function
-    jal     print_result    # print results to console
+    #jal     vbsme           # call function
+    #jal     print_result    # print results to console
     ############################################################
     # End of test 2   
                     
@@ -532,132 +542,132 @@ main:
       
     # Start test 4 
     ############################################################
-    la      $a0, asize4     # 1st parameter: address of asize4[0]
-    la      $a1, frame4     # 2nd parameter: address of frame4[0]
-    la      $a2, window4    # 3rd parameter: address of window4[0] 
+    #la      $a0, asize4     # 1st parameter: address of asize4[0]
+    #la      $a1, frame4     # 2nd parameter: address of frame4[0]
+    #la      $a2, window4    # 3rd parameter: address of window4[0] 
 
-    jal     vbsme           # call function
-    jal     print_result    # print results to console
+    #jal     vbsme           # call function
+    #jal     print_result    # print results to console
     ############################################################
     # End of test 4   
    
    
     # Start test 5
     ############################################################
-    la      $a0, asize5     # 1st parameter: address of asize5[0]
-    la      $a1, frame5     # 2nd parameter: address of frame5[0]
-    la      $a2, window5    # 3rd parameter: address of window5[0] 
+    #la      $a0, asize5     # 1st parameter: address of asize5[0]
+    #la      $a1, frame5     # 2nd parameter: address of frame5[0]
+    #la      $a2, window5    # 3rd parameter: address of window5[0] 
 
-    jal     vbsme           # call function
-    jal     print_result    # print results to console
+    #jal     vbsme           # call function
+    #jal     print_result    # print results to console
     ############################################################
     # End of test 5
 
    
     # Start test 6 
     ############################################################
-    la      $a0, asize6     # 1st parameter: address of asize6[0]
-    la      $a1, frame6     # 2nd parameter: address of frame6[0]
-    la      $a2, window6    # 3rd parameter: address of window6[0] 
+    #la      $a0, asize6     # 1st parameter: address of asize6[0]
+    #la      $a1, frame6     # 2nd parameter: address of frame6[0]
+    #la      $a2, window6    # 3rd parameter: address of window6[0] 
 
-    jal     vbsme           # call function
-    jal     print_result    # print results to console
+    #jal     vbsme           # call function
+    #jal     print_result    # print results to console
     ############################################################
     # End of test 6
    
 
     # Start test 7
     ############################################################
-    la      $a0, asize7     # 1st parameter: address of asize7[0]
-    la      $a1, frame7     # 2nd parameter: address of frame7[0]
-    la      $a2, window7    # 3rd parameter: address of window7[0] 
+    #la      $a0, asize7     # 1st parameter: address of asize7[0]
+    #la      $a1, frame7     # 2nd parameter: address of frame7[0]
+    #la      $a2, window7    # 3rd parameter: address of window7[0] 
 
-    jal     vbsme           # call function
-    jal     print_result    # print results to console
+    #jal     vbsme           # call function
+    #jal     print_result    # print results to console
     ############################################################
     # End of test 7   
    
 
     # Start test 8 
     ############################################################
-    la      $a0, asize8     # 1st parameter: address of asize8[0]
-    la      $a1, frame8     # 2nd parameter: address of frame8[0]
-    la      $a2, window8    # 3rd parameter: address of window8[0] 
+    #la      $a0, asize8     # 1st parameter: address of asize8[0]
+    #la      $a1, frame8     # 2nd parameter: address of frame8[0]
+    #la      $a2, window8    # 3rd parameter: address of window8[0] 
 
-    jal     vbsme           # call function
-    jal     print_result    # print results to console
+    #jal     vbsme           # call function
+    #jal     print_result    # print results to console
     ############################################################
     # End of test 8   
    
    
     # Start test 9 
     ############################################################
-    la      $a0, asize9     # 1st parameter: address of asize9[0]
-    la      $a1, frame9     # 2nd parameter: address of frame9[0]
-    la      $a2, window9    # 3rd parameter: address of window9[0] 
+    #la      $a0, asize9     # 1st parameter: address of asize9[0]
+    #la      $a1, frame9     # 2nd parameter: address of frame9[0]
+    #la      $a2, window9    # 3rd parameter: address of window9[0] 
 
-    jal     vbsme           # call function
-    jal     print_result    # print results to console
+    #jal     vbsme           # call function
+    #jal     print_result    # print results to console
     ############################################################
     # End of test 9      
    
    
     # Start test 10 
     ############################################################
-    la      $a0, asize10        # 1st parameter: address of asize10[0]
-    la      $a1, frame10        # 2nd parameter: address of frame10[0]
-    la      $a2, window10       # 3rd parameter: address of window10[0]   
+    #la      $a0, asize10        # 1st parameter: address of asize10[0]
+    #la      $a1, frame10        # 2nd parameter: address of frame10[0]
+    #la      $a2, window10       # 3rd parameter: address of window10[0]   
 
-    jal     vbsme               # call function
-    jal     print_result        # print results to console
+    #jal     vbsme               # call function
+    #jal     print_result        # print results to console
     ############################################################
     # End of test 10  
    
    
     # Start test 11
     ############################################################
-    la      $a0, asize11     # 1st parameter: address of asize11[0]
-    la      $a1, frame11     # 2nd parameter: address of frame11[0]
-    la      $a2, window11    # 3rd parameter: address of window11[0]   
+    #la      $a0, asize11     # 1st parameter: address of asize11[0]
+    #la      $a1, frame11     # 2nd parameter: address of frame11[0]
+    #la      $a2, window11    # 3rd parameter: address of window11[0]   
 
-    jal     vbsme           # call function
-    jal     print_result    # print results to console
+    #jal     vbsme           # call function
+    #jal     print_result    # print results to console
     ############################################################
     # End of test 11  
    
 
     # Start test 12
     ############################################################
-    la      $a0, asize12     # 1st parameter: address of asize12[0]
-    la      $a1, frame12     # 2nd parameter: address of frame12[0]
-    la      $a2, window12    # 3rd parameter: address of window12[0]   
+    #la      $a0, asize12     # 1st parameter: address of asize12[0]
+    #la      $a1, frame12     # 2nd parameter: address of frame12[0]
+    #la      $a2, window12    # 3rd parameter: address of window12[0]   
 
-    jal     vbsme           # call function
-    jal     print_result    # print results to console
+    #jal     vbsme           # call function
+    #jal     print_result    # print results to console
     ############################################################
     # End of test 12  
    
 
     # Start test 13
     ############################################################
-    la      $a0, asize13     # 1st parameter: address of asize13[0]
-    la      $a1, frame13     # 2nd parameter: address of frame13[0]
-    la      $a2, window13    # 3rd parameter: address of window13[0]   
+    #la      $a0, asize13     # 1st parameter: address of asize13[0]
+    #la      $a1, frame13     # 2nd parameter: address of frame13[0]
+    #la      $a2, window13    # 3rd parameter: address of window13[0]   
 
-    jal     vbsme           # call function
-    jal     print_result    # print results to console
+    #jal     vbsme           # call function
+    #jal     print_result    # print results to console
     ############################################################
     # End of test 13  
    
    
     # Start test 14
     ############################################################
-    la      $a0, asize14     # 1st parameter: address of asize14[0]
-    la      $a1, frame14     # 2nd parameter: address of frame14[0]
-    la      $a2, window14    # 3rd parameter: address of window14[0]   
+    #la      $a0, asize14     # 1st parameter: address of asize14[0]
+    #la      $a1, frame14     # 2nd parameter: address of frame14[0]
+    #la      $a2, window14    # 3rd parameter: address of window14[0]   
 
-    jal     vbsme           # call function
-    jal     print_result    # print results to console
+    #jal     vbsme           # call function
+    #jal     print_result    # print results to console
     ############################################################
     # End of test 14     
    
@@ -780,341 +790,379 @@ vbsme:
     li      $v1, 0
 
     # insert your code here
-la $a0,asize1
-la $a1,frame1
-la $a2,window1
-
-lw $s0,0($a0)#i
-lw $s1,4($a0)#j
-lw $s2,8($a0)#k
-lw $s3,12($a0)#l
-
-
-la $t5,($a1)
-
-
-li $t0,0
-li $t1,0
-li $t2,0
-li $t3,0
-li $t4,0
-li $t6,0
-li $t7,0
-li $t8,0
-li $t9,0
-
-
-
-move $t0,$zero
-move $t1,$s2
-
-
-j iterate_window
-next_one:
-
-start_again:
-beq $s0,$s2,ending_program
-
-
-
-
-li $t0,0
-li $t1,0
-li $t2,0
-li $t4,0
-li $t5,0
-li $t6,0
-li $t7,0
-li $t8,0
-
-
-move $t0,$zero
-sub $t1,$s0,$s2
-
-j iterate_rightF
-next_one2:
-
-
-
-
-
-
-li $t0,0
-li $t1,0
-li $t2,0
-li $t4,0
-li $t5,0
-li $t6,0
-li $t7,0
-li $t8,0
-
-
-move $t1,$zero
-sub $t0,$s1,$s3
-
-j iterate_down
-next_one3:
-
-
-
-
-
-
-li $t0,0
-li $t1,0
-li $t2,0
-li $t4,0
-li $t5,0
-li $t6,0
-li $t7,0
-li $t8,0
-
-
-sub $t1,$s0,$s2
-
-
-
-j iterate_left
-next_one4:
-
-
-sub $s0,$s0,$s2
-sub $s1,$s1,$s3
-
-li $t0,0
-li $t1,0
-li $t2,0
-li $t4,0
-li $t5,0
-li $t6,0
-li $t7,0
-li $t8,0
-
-
-sub $t0,$s1,$s3
-
-
-
-j iterate_up
-next_one5:
-
-add $t3,$t3,$s3
-add $t9,$t9,$s2
-
-j start_again
-
-ending_program:
-
-
-
-
-
-
-j program_end
-
-
-
-#move $t0,$zero
-#move $t1,$s2
-
-iterate_window:
-bge $t0,$t1,leave_window
-sll $t3,$t0,2# multiply t3 by 4
-add $a2,$a2,$t3#register plus offset of #t3
-li $t4,0 #intialize #t4
-add $t4,$t4,$a2   #store rgister offset value to t4 #if we are at the first index of the frame0 we move right to get the values of the window and the values of the frame0
-li $t6,0
-loop_F:
-beq  $t6,$s2,exit_i
-lw $s4,0($t4)
-add $v0,$v0,$s4
-li $t7,1
-loopj:
-beq $t7,$s3,jend
-#increments j by whatever framesize and getting 4 bites then adding it to t4 to offset
-sll $t8,$s2,2
-add $t4,$t4,$t8
-lw $s4,0($t4)
-add $v0,$v0,$s4
-addi $t7,$t7,1
-j loopj
-jend:
-sub $t8,$t8,4
-sub $t4,$t4,$t8
-li $t8,0
-addi $t6,$t6,1
-j loop_F
-exit_i:
-add $t0,$t0,$t1   
-j iterate_window
-leave_window:
-j next_one
-
-
-#move $t0,$zero
-#sub $t1,$s0,$s2
-
-iterate_rightF:
-bgt $t0,$t1,leave_right
-li $t4,0 #intialize #t4
-add $t4,$t4,$a0  #store rgister offset value to t4
-li $t6,0
-loop_F1:
-beq  $t6,$s2,exit_i1
-li $t7,0
-loopj1:
-beq $t7,$s3,jend1
-#increments j by whatever framesize and getting 4 bites then adding it to t4 to offset
-lw $s4,0($t4)
-add $v0,$v0,$s4
-sll $t8,$s0,2
-add $t4,$t4,$t8
-addi $t7,$t7,1
-j loopj1
-jend1:
-mul $t8,$t8,$s3
-addi $t8,$t8,-4
-sub $t4,$t4,$t8
-li $t8,0
-addi $t6,$t6,1
-j loop_F1
-exit_i1:
-la $t5,($a0)
-la $a0,($t5)
-add $a0,$a0,4
-addi $t0,$t0,1 
-addi $t9,$t9,1  
-j iterate_rightF
-leave_right:
-addi $t9,$t9,-1
-j next_one2
-
-#move $t0,$zero
-#sub $t1,$s1,$s3
-
-iterate_down:
-bgt $t1,$t0,leave_down
-li $t4,0 #intialize #t4
-add $t4,$t4,$a0  #store rgister offset value to t4
-li $t6,0
-loop_F2:
-beq  $t6,$s2,exit_i2
-li $t7,0
-loopj2:
-beq $t7,$s3,jend2
-#increments j by whatever framesize and getting 4 bites then adding it to t4 to offset
-lw $s4,0($t4)
-add $v0,$v0,$s4
-sll $t8,$s0,2
-add $t4,$t4,$t8
-addi $t7,$t7,1
-j loopj2
-jend2:
-mul $t8,$t8,$s3
-addi $t8,$t8,-4
-sub $t4,$t4,$t8
-li $t8,0
-addi $t6,$t6,1
-j loop_F2
-exit_i2:
-la $t5,($a0)
-la $a0,($t5)
-mul $t2,$s0,$s1
-add $a0,$a0,$t2
-addi $t1,$t1,1  
-addi $t3,$t3,1 
-j iterate_down
-leave_down:
-j next_one3
-
-#mub $t0,$s0,$s2
-#sub $t1,$s1,$s3
-
-iterate_left:
-bltz  $t1,leave_left
-li $t4,0 #intialize #t4
-add $t4,$t4,$a0  #store rgister offset value to t4
-li $t6,0
-loop_F3:
-beq  $t6,$s2,exit_i3
-li $t7,0
-loopj3:
-beq $t7,$s3,jend3
-#increments j by whatever framesize and getting 4 bites then adding it to t4 to offset
-lw $s4,0($t4)
-add $v0,$v0,$s4
-sll $t8,$s0,2
-add $t4,$t4,$t8
-addi $t7,$t7,1
-j loopj3
-jend3:
-mul $t8,$t8,$s3
-addi $t8,$t8,-4
-sub $t4,$t4,$t8
-li $t8,0
-addi $t6,$t6,1
-j loop_F3
-exit_i3:
-la $t5,($a0)
-la $a0,($t5)
-add $a0,$a0,-4
-addi $t1,$t1,-1  
-sub $t9,$t9,1 
-j iterate_left
-leave_left:
-j next_one4
-
-
-#mub $t0,$s1,$s3
-#sub $t1,$s1,$s3
-
-iterate_up:
-bltz $t0,leave_up
-li $t4,0 #intialize #t4
-add $t4,$t4,$a0  #store rgister offset value to t4
-li $t6,0
-loop_F4:
-beq  $t6,$s2,exit_i4
-li $t7,0
-loopj4:
-beq $t7,$s3,jend4
-#increments j by whatever framesize and getting 4 bites then adding it to t4 to offset
-lw $s4,0($t4)
-add $v0,$v0,$s4
-sll $t8,$s0,2
-add $t4,$t4,$t8
-addi $t7,$t7,1
-j loopj4
-jend4:
-mul $t8,$t8,$s3
-addi $t8,$t8,-4
-sub $t4,$t4,$t8
-li $t8,0
-addi $t6,$t6,1
-j loop_F4
-exit_i4:
-la $t5,($a0)
-la $a0,($t5)
-mul $t2,$s0,$s1
-sub $a0,$a0,$t2
-addi $t0,$t0,-1 
-sub $t3,$t3,1
-j iterate_up
-leave_up:
-j next_one5
-
-
-
-
-
-
-j program_end
-
-
-
-
-program_end:
-li $v0,10
-syscall
-  
- 
+   
+
+# Save the $ra value so we know when to jump back to main
+addi $sp, $sp -4
+sw $ra, 0($sp)
+
+
+
+#####################################################################
+### Search Pattern
+#####################################################################
+
+# Load array sizes
+lw $s0, 0($a0)  # frame height (i) ROWS
+lw $s1, 4($a0)  # frame width (j) COLS
+lw $s2, 8($a0)  # window height (k) WindowX
+lw $s3, 12($a0) # window width (l) WindowY
+
+# Initialize SAD variables
+li $s4, 0x7FFFFFFF     # minsad (initialize to -1 for first comparison)
+li $s5, 0       # bestx
+li $s6, 0       # besty
+li $t8, 0	# windowSAD
+li $t9, 0 	# tempSAD
+li $s7, 0 	# free variable
+
+#Find the SAD of the window
+	
+li $t0, 0	# index i
+
+WindowLoopOuter:		
+	bge $t0, $s2, OuterEnd
+
+	li $t1, 0	# index j
+WindowLoopInner:
+	bge $t1, $s3, InnerEnd		#(j<width)
+	
+	mul $t2, $t0, $s3	# t1 = rowIndex * colSize
+	add $t2, $t2, $t1	# + colIndex
+	sll $t2, $t2, 2 	# * dataSize
+
+	add $t2, $t2, $a2	# + baseAddr for window
+
+	lw $t4, ($t2)	
+	add $t8, $t8, $t4	# windowSum = windowSum + array[i][j]
+	addi $t1, $t1, 1	# i++
+	j WindowLoopInner
+InnerEnd:
+	addi $t0, $t0, 1
+	j WindowLoopOuter
+OuterEnd:
+
+# Initialize spiral search
+li $t0, 0       	# top
+addi $t1, $s0, -1       # bottom
+li $t2, 0       	# left
+addi $t3, $s1, -1       # right
+li $t4, 0       # direction
+li $t6, 0       # i
+li $t7, 0       # j
+
+# Spiral Search Start ##################################################################
+
+BigLoop:
+	beq $s4, $zero, BigLoopEnd		# (while (lowestSAD!=0))
+	beq $t4, $zero, RightLoopStart		# if direction == 0
+	addi $t4, $t4, -1
+	beq $t4, $zero, DownLoopStart		# if direction == 1
+	addi $t4, $t4, -1
+	beq $t4, $zero, LeftLoopStart		# if direction == 2
+	j UpLoopStart				# if direction == 3
+
+########################################################################################################### MoveRight
+
+	
+RightLoopStart:
+	move $t6, $t0 	# i = top
+	move $t7, $t2	# j = left
+
+   # Debug: Print coordinates being checked before Read
+    move $a0, $t6
+    li $v0, 1
+    syscall
+
+    move $a0, $t7
+    li $v0, 1
+    syscall
+
+RightLoop:
+	li $t9, 0
+	slt $t5, $t3, $t7, 	# $t5 is 1 if right < j, otherwise its 0
+	bne $t5, $zero, RightLoopEnd	
+
+	jal Read
+
+	jal SAD
+	   
+ # Debug: Print SAD value after computation
+    move $a0, $t9   # Move tempSAD value to $a0 for printing
+    li $v0, 1       # Load the print integer syscall number
+    syscall
+
+	
+	slt $s7, $t9, $zero	# if(tempSad < 0)
+	bne $s7, $zero, NotRight
+
+	slt $s7, $t9, $s4	# if(tempSad < lowestSad)
+	beq $s7, $zero, NotRight
+
+	move $s4, $t9
+	move $s5, $t6
+	move $s6, $t7
+NotRight:
+	addi $t7, $t7, 1	#increment loop j++
+	
+	j RightLoop
+
+RightLoopEnd:
+	addi $t0, $t0, 1	#top++
+	li $t4, 1
+	j BigLoop
+
+########################################################################################################### MoveDown
+
+	
+DownLoopStart:
+	move $t6, $t0 	# i = top
+	move $t7, $t3	# j = right
+	sub $t7, $t7, $s2	# j - windowX
+	addi $t7, $t7, 1	# j + 1
+DownLoop:
+	li $t9, 0
+	slt $t5, $t1, $t6, 	# $t5 is 1 i f bottom < i, otherwise 0
+	bne $t5, $zero, DownLoopEnd	
+
+#################################
+	jal Read		#
+				#
+	jal SAD			#
+#################################
+	
+	slt $s7, $t9, $zero	# if(tempSad < 0)
+	bne $s7, $zero, NotRight
+
+	slt $s7, $t9, $s4	# if(tempSad < lowestSad)
+	beq $s7, $zero, NotDown
+	move $s4, $t9
+	move $s5, $t6
+	move $s6, $t7
+NotDown:
+	addi $t6 $t6, 1	#increment loop i++
+	
+	j DownLoop
+
+DownLoopEnd:
+	addi $t3, $t3, -1	# right--
+	li $t4, 2
+	j BigLoop
+
+########################################################################################################### MoveLeft
+
+	
+LeftLoopStart:
+	move $t6, $t1 	# i = bottom
+	move $t7, $t3	# j = right
+LeftLoop:
+	li $t9, 0
+	slt $t5, $t7, $t2, 	# $t5 is 1 if j < left, otherwise 0
+	bne $t5, $zero, LeftLoopEnd	
+
+#################################
+	jal Read		#
+				#
+	jal SAD			#
+#################################
+		
+	slt $s7, $t9, $zero	# if(tempSad < 0)
+	bne $s7, $zero, NotRight
+
+
+
+	slt $s7, $t9, $s4	# if(tempSad < lowestSad)
+	beq $s7, $zero, NotLeft
+	move $s4, $t9
+	move $s5, $t6
+	move $s6, $t7
+NotLeft:
+	addi $t7, $t7, -1	#increment loop j--
+	
+	j LeftLoop
+
+LeftLoopEnd:
+	addi $t1, $t1, -1	#bottom --
+	li $t4, 3
+	j BigLoop
+
+########################################################################################################### MoveUp
+
+	
+UpLoopStart:
+	move $t6, $t1 	# i = bottom
+	move $t7, $t2	# j = left
+UpLoop:
+	li $t9, 0
+	slt $t5, $t6, $t0, 	# $t5 is 1 if i < top, otherwise 0
+	bne $t5, $zero, UpLoopEnd	# (branch if top > i)
+
+#################################
+	jal Read		#
+				#
+	jal SAD			#
+#################################
+		
+	slt $s7, $t9, $zero	# if(tempSad < 0)
+	bne $s7, $zero, NotRight
+
+
+
+	slt $s7, $t9, $s4	# if(tempSad < lowestSad)
+	beq $s7, $zero, NotUp
+	move $s4, $t9
+	move $s5, $t6
+	move $s6, $t7
+NotUp:
+	addi $t6, $t6, -1	#increment loop i--
+	
+	j UpLoop
+
+UpLoopEnd:
+	addi $t2, $t2, 1	# Left++
+
+	li $t4, 0
+	j BigLoop
+
+BigLoopEnd:
+
+add $v0, $v0, $s5
+add $v1, $v1, $s6
+
+# Deallocate Stack Space
+lw $ra, 0($sp)
+addi $sp, $sp, 4
+
+jr $ra  # Return from subroutine
+
+
+
+
+
+
+	
+#####################################################################
+### Read using Row Major (Safe to use $t1-$t5)
+#####################################################################
+### changing the given window array. 
+### Register Values:
+### t0 top
+### t1 bottom
+### t2 left
+### t3 right
+### t4 direction
+### t6 i
+### t7 j
+#####################################################################
+
+Read:
+
+	addi $sp, $sp, -20 	# allocate 4 more spaces on the stack before Read function call
+	sw $t1, 0($sp)
+	sw $t2, 4($sp)
+	sw $t3, 8($sp)
+	sw $t4, 12($sp)
+	sw $t5, 16($sp)
+
+	li $t1, 0	# index i
+	li $t2, 0	# index j
+
+ReadLoopOuter:		
+	bge $t1, $s2, ReadOutEnd
+
+	li $t2, 0	# index j
+ReadLoopInner:
+	bge $t2, $s3, ReadInEnd		#(j<width)
+	
+	#Calculate temp index: 
+		
+	mul $t3, $t1, $s3	# t1 = rowIndex * colSize
+	add $t3, $t3, $t2	# + colIndex
+	sll $t3, $t3, 2 	# * dataSize
+
+	add $t3, $t3, $a2	# + baseAddr for temp
+
+	# Calcilate frame index (row + i)*framewidth + (col+j)
+
+	add $t4, $t1, $t6	# row + i
+	mul $t4, $t4, $s1 	# *framewidth
+	add $t4, $t4, $t7	# +col
+	add $t4, $t4, $t2	# + j
+
+	sll $t4, $t4, 2
+	add $t4, $t4, $a1	# + frame base address 
+	
+	#preform assignment
+
+	lw $t5, 0($t4)		# load from frame
+	sw $t5, 0($t3)		# store to temp
+		
+	addi $t2, $t2, 1	# j++
+	j ReadLoopInner
+
+ReadInEnd:
+	addi $t1, $t1, 1	# i++
+	j ReadLoopOuter
+
+ReadOutEnd:
+
+	lw $t1, 0($sp)
+	lw $t2, 4($sp)
+	lw $t3, 8($sp)
+	lw $t4, 12($sp)
+	lw $t5, 16($sp)
+	addi $sp, $sp, 20
+	jr $ra
+
+#####################################################################
+### SAD using Row Major (Safe to use $t0-$t3) and ($t9 is tempSAD)
+#####################################################################
+
+#Using Row-Major to access a 2d array formula is addr = baseAddr + (rowIndex * colSize + colIndex)*dataSize
+
+SAD:	
+
+	addi $sp, $sp, -20 	# allocate 5 more spaces on the stack before SAD function call
+	sw $t0, 0($sp)
+	sw $t1, 4($sp)
+	sw $t2, 8($sp)
+	sw $t3, 12($sp)
+	sw $t4, 16($sp)
+
+
+	li $t0, 0	# index i
+	li $t1, 0	# index j
+
+TempLoopOuter:		
+	bge $t0, $s2, tOuterEnd
+
+	li $t1, 0	# index j
+TempLoopInner:
+	bge $t1, $s3, tInnerEnd		#(j<width)
+		
+	mul $t2, $t0, $s3	# t1 = rowIndex * colSize
+	add $t2, $t2, $t1	# + colIndex
+	sll $t2, $t2, 2 	# * dataSize
+
+	add $t2, $t2, $a2	# + baseAddr for temp
+
+	lw $t3, ($t2)	
+	add $t9, $t9, $t3	# tempSAD = tempSAD + array[i][j]
+	addi $t1, $t1, 1	# j++
+	j TempLoopInner
+tInnerEnd:
+	addi $t0, $t0, 1	# i++
+	j TempLoopOuter
+tOuterEnd:
+	
+	sub $t9, $t9, $t8
+	
+
+	lw $t0, 0($sp)
+	lw $t1, 4($sp)
+	lw $t2, 8($sp)
+	lw $t3, 12($sp)
+	lw $t4, 16($sp)
+	addi $sp, $sp, 20
+
+	jr $ra
