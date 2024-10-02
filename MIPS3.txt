@@ -52,10 +52,10 @@ li $t9,0
 
 
 
-move $t1,$zero
-move $t0,$s2
+move $t0,$zero
+move $t1,$s2
 
-#jal iterate_Window
+
 j iterate_window
 next_one:
 
@@ -103,8 +103,8 @@ li $t7,0
 li $t8,0
 li $t9,0
 
-move $t0,$zero
-sub $t1,$s1,$s3
+move $t1,$zero
+sub $t0,$s1,$s3
 
 j iterate_down
 next_one3:
@@ -128,7 +128,7 @@ li $t7,0
 li $t8,0
 li $t9,0
 
-sub $t0,$s0,$s2
+sub $t1,$s0,$s2
 
 
 
@@ -282,7 +282,7 @@ jal print_vo1
 la $a0,($t5)
 mul $t2,$s0,$s1
 add $a0,$a0,$t2
-addi $t0,$t0,1   
+addi $t1,$t1,1   
 j iterate_down
 leave_down:
 j next_one3
@@ -291,7 +291,7 @@ j next_one3
 #sub $t1,$s1,$s3
 
 iterate_left:
-bltz  $t0,leave_left
+bltz  $t1,leave_left
 li $t4,0 #intialize #t4
 add $t4,$t4,$a0  #store rgister offset value to t4
 li $t6,0
@@ -319,7 +319,7 @@ la $t5,($a0)
 jal print_vo1
 la $a0,($t5)
 add $a0,$a0,-4
-subi $t0,$t0,1   
+subi $t1,$t1,1   
 j iterate_left
 leave_left:
 j next_one4
